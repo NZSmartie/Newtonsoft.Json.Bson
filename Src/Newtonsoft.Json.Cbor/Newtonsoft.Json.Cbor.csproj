@@ -9,7 +9,7 @@
     <Authors>James Newton-King, Roman Vaughan</Authors>
     <Company>Newtonsoft</Company>
     <Product>Json.NET CBOR</Product>
-    <Description>Json.NET CBOR adds support for reading and writing BSON</Description>
+    <Description>Json.NET CBOR adds support for reading and writing CBOR (RFC 7049)</Description>
     <Copyright>Copyright © James Newton-King 2017</Copyright>
     <Summary>Json.NET BSON adds support for reading and writing BSON</Summary>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -24,7 +24,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>0.2</Version>
+    <Version>0.2-alpha</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
