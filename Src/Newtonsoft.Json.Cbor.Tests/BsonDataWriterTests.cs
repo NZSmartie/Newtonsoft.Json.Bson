@@ -60,14 +60,14 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void CloseOutput()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             Assert.IsTrue(ms.CanRead);
             writer.Close();
             Assert.IsFalse(ms.CanRead);
 
             ms = new MemoryStream();
-            writer = new BsonDataWriter(ms) { CloseOutput = false };
+            writer = new CborDataWriter(ms) { CloseOutput = false };
 
             Assert.IsTrue(ms.CanRead);
             writer.Close();
@@ -78,15 +78,15 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteSingleObject()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("Blah");
             writer.WriteValue(1);
             writer.WriteEndObject();
 
-            string bson = BytesToHex(ms.ToArray());
-            Assert.AreEqual("0F-00-00-00-10-42-6C-61-68-00-01-00-00-00-00", bson);
+            string cbor = BytesToHex(ms.ToArray());
+            Assert.AreEqual("A1-64-42-6C-61-68-01", cbor);
         }
 
 #if !NET20
@@ -94,27 +94,28 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteValues()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartArray();
             writer.WriteValue(long.MaxValue);
-            writer.WriteValue((ulong)long.MaxValue);
+            writer.WriteValue(ulong.MaxValue);
             writer.WriteValue(int.MaxValue);
-            writer.WriteValue((uint)int.MaxValue);
-            writer.WriteValue(byte.MaxValue);
+            writer.WriteValue(uint.MaxValue);
             writer.WriteValue(sbyte.MaxValue);
+            writer.WriteValue(byte.MaxValue);
             writer.WriteValue('a');
-            writer.WriteValue(decimal.MaxValue);
+            //writer.WriteValue(decimal.MaxValue);
             writer.WriteValue(double.MaxValue);
+            // [ 9223372036854775807, 18446744073709551615, 2147483647, 4294967295, 127, 255, "a", 1.7976931348623157E+308, 3.40282347E+38, true, h'0001020304']
             writer.WriteValue(float.MaxValue);
             writer.WriteValue(true);
             writer.WriteValue(new byte[] { 0, 1, 2, 3, 4 });
-            writer.WriteValue(new DateTimeOffset(2000, 12, 29, 12, 30, 0, TimeSpan.Zero));
-            writer.WriteValue(new DateTime(2000, 12, 29, 12, 30, 0, DateTimeKind.Utc));
+            //writer.WriteValue(new DateTimeOffset(2000, 12, 29, 12, 30, 0, TimeSpan.Zero));
+            //writer.WriteValue(new DateTime(2000, 12, 29, 12, 30, 0, DateTimeKind.Utc));
             writer.WriteEnd();
 
-            string bson = BytesToHex(ms.ToArray());
-            Assert.AreEqual("8C-00-00-00-12-30-00-FF-FF-FF-FF-FF-FF-FF-7F-12-31-00-FF-FF-FF-FF-FF-FF-FF-7F-10-32-00-FF-FF-FF-7F-10-33-00-FF-FF-FF-7F-10-34-00-FF-00-00-00-10-35-00-7F-00-00-00-02-36-00-02-00-00-00-61-00-01-37-00-00-00-00-00-00-00-F0-45-01-38-00-FF-FF-FF-FF-FF-FF-EF-7F-01-39-00-00-00-00-E0-FF-FF-EF-47-08-31-30-00-01-05-31-31-00-05-00-00-00-00-00-01-02-03-04-09-31-32-00-40-C5-E2-BA-E3-00-00-00-09-31-33-00-40-C5-E2-BA-E3-00-00-00-00", bson);
+            string cbor = BytesToHex(ms.ToArray());
+            Assert.AreEqual("8B-1B-7F-FF-FF-FF-FF-FF-FF-FF-1B-FF-FF-FF-FF-FF-FF-FF-FF-1A-7F-FF-FF-FF-1A-FF-FF-FF-FF-18-7F-18-FF-61-61-FB-7F-EF-FF-FF-FF-FF-FF-FF-FA-7F-7F-FF-FF-F5-45-00-01-02-03-04", cbor);
         }
 #endif
 
@@ -122,14 +123,14 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteDouble()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartArray();
             writer.WriteValue(99.99d);
             writer.WriteEnd();
 
             string bson = BytesToHex(ms.ToArray());
-            Assert.AreEqual("10-00-00-00-01-30-00-8F-C2-F5-28-5C-FF-58-40-00", bson);
+            Assert.AreEqual("81-FB-40-58-FF-5C-28-F5-C2-8F", bson);
         }
 
         [Test]
@@ -138,7 +139,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("D821EED7-4B5C-43C9-8AC2-6928E579B705");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartArray();
             writer.WriteValue(g);
@@ -152,7 +153,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteArrayBsonFromSite()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             writer.WriteStartArray();
             writer.WriteValue("a");
             writer.WriteValue("b");
@@ -163,7 +164,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             ms.Seek(0, SeekOrigin.Begin);
 
-            string expected = "20-00-00-00-02-30-00-02-00-00-00-61-00-02-31-00-02-00-00-00-62-00-02-32-00-02-00-00-00-63-00-00";
+            string expected = "83-61-61-61-62-61-63";
             string bson = BytesToHex(ms.ToArray());
 
             Assert.AreEqual(expected, bson);
@@ -175,7 +176,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             byte[] data = Encoding.UTF8.GetBytes("Hello world!");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             writer.WriteStartArray();
             writer.WriteValue("a");
             writer.WriteValue("b");
@@ -186,13 +187,12 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             ms.Seek(0, SeekOrigin.Begin);
 
-            string expected = "2B-00-00-00-02-30-00-02-00-00-00-61-00-02-31-00-02-00-00-00-62-00-05-32-00-0C-00-00-00-00-48-65-6C-6C-6F-20-77-6F-72-6C-64-21-00";
+            string expected = "83-61-61-61-62-6C-48-65-6C-4C-6F-20-77-6F-72-6C-64-21";
             string bson = BytesToHex(ms.ToArray());
 
             Assert.AreEqual(expected, bson);
 
-            BsonDataReader reader = new BsonDataReader(new MemoryStream(ms.ToArray()));
-            reader.ReadRootValueAsArray = true;
+            CborDataReader reader = new CborDataReader(new MemoryStream(ms.ToArray()));
             reader.Read();
             reader.Read();
             reader.Read();
@@ -205,9 +205,8 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteNestedArray()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             writer.WriteStartObject();
-
             writer.WritePropertyName("_id");
             writer.WriteValue(HexToBytes("4A-78-93-79-17-22-00-00-00-00-61-CF"));
 
@@ -232,7 +231,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             ms.Seek(0, SeekOrigin.Begin);
 
-            string expected = "87-00-00-00-05-5F-69-64-00-0C-00-00-00-00-4A-78-93-79-17-22-00-00-00-00-61-CF-04-61-00-5D-00-00-00-01-30-00-00-00-00-00-00-00-F0-3F-01-31-00-00-00-00-00-00-00-00-40-01-32-00-00-00-00-00-00-00-08-40-01-33-00-00-00-00-00-00-00-10-40-01-34-00-00-00-00-00-00-00-14-50-01-35-00-00-00-00-00-00-00-18-40-01-36-00-00-00-00-00-00-00-1C-40-01-37-00-00-00-00-00-00-00-20-40-00-02-62-00-05-00-00-00-74-65-73-74-00-00";
+            string expected = "A3-63-5F-69-64-4C-4A-78-93-79-17-22-00-00-00-00-61-CF-61-61-88-FB-3F-F0-00-00-00-00-00-00-FB-40-00-00-00-00-00-00-00-FB-40-08-00-00-00-00-00-00-FB-40-10-00-00-00-00-00-00-FB-50-14-00-00-00-00-00-00-FB-40-18-00-00-00-00-00-00-FB-40-1C-00-00-00-00-00-00-FB-40-20-00-00-00-00-00-00-61-62-64-74-65-73-74";
             string bson = BytesToHex(ms.ToArray());
 
             Assert.AreEqual(expected, bson);
@@ -242,7 +241,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteSerializedStore()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             Store s1 = new Store();
             s1.Color = StoreColor.White;
@@ -262,7 +261,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             serializer.Serialize(writer, s1);
 
             ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
             Store s2 = (Store)serializer.Deserialize(reader, typeof(Store));
 
             Assert.AreNotEqual(s1, s2);
@@ -281,7 +280,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Assert.AreEqual(s1.Width, s2.Width);
 
             MemoryStream ms1 = new MemoryStream();
-            BsonDataWriter writer1 = new BsonDataWriter(ms1);
+            CborDataWriter writer1 = new CborDataWriter(ms1);
 
             serializer.Serialize(writer1, s1);
 
@@ -292,7 +291,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteLargeStrings()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             StringBuilder largeStringBuilder = new StringBuilder();
             for (int i = 0; i < 100; i++)
@@ -358,13 +357,13 @@ namespace Newtonsoft.Json.Cbor.Tests
             GoogleMapGeocoderStructure jsonGoogleMapGeocoder = JsonConvert.DeserializeObject<GoogleMapGeocoderStructure>(json);
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             JsonSerializer serializer = new JsonSerializer();
             serializer.Serialize(writer, jsonGoogleMapGeocoder);
 
             ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
             GoogleMapGeocoderStructure bsonGoogleMapGeocoder = (GoogleMapGeocoderStructure)serializer.Deserialize(reader, typeof(GoogleMapGeocoderStructure));
 
             Assert.IsNotNull(bsonGoogleMapGeocoder);
@@ -394,7 +393,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteEmptyStrings()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("");
@@ -411,7 +410,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             ExceptionAssert.Throws<JsonWriterException>(() =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 writer.WriteStartArray();
                 writer.WriteComment("fail");
@@ -424,7 +423,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             ExceptionAssert.Throws<JsonWriterException>(() =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 writer.WriteStartArray();
                 writer.WriteStartConstructor("fail");
@@ -437,7 +436,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             ExceptionAssert.Throws<JsonWriterException>(() =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 writer.WriteStartArray();
                 writer.WriteRaw("fail");
@@ -450,7 +449,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             ExceptionAssert.Throws<JsonWriterException>(() =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 writer.WriteStartArray();
                 writer.WriteRawValue("fail");
@@ -470,7 +469,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             JsonSerializer serializer = new JsonSerializer();
 
             // serialize product to BSON
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             serializer.Serialize(writer, p);
 
             Console.WriteLine(BitConverter.ToString(ms.ToArray()));
@@ -485,7 +484,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             ms.Seek(0, SeekOrigin.Begin);
 
             // deserialize product from BSON
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
             Product deserializedProduct = serializer.Deserialize<Product>(reader);
 
             Console.WriteLine(deserializedProduct.Name);
@@ -497,72 +496,22 @@ namespace Newtonsoft.Json.Cbor.Tests
         }
 
         [Test]
-        public void WriteOid()
-        {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
-
-            byte[] oid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-
-            writer.WriteStartObject();
-            writer.WritePropertyName("_oid");
-            writer.WriteObjectId(oid);
-            writer.WriteEndObject();
-
-            string bson = BytesToHex(ms.ToArray());
-            Assert.AreEqual("17-00-00-00-07-5F-6F-69-64-00-01-02-03-04-05-06-07-08-09-0A-0B-0C-00", bson);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
-
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.StartObject, reader.TokenType);
-
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.PropertyName, reader.TokenType);
-
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.Bytes, reader.TokenType);
-            CollectionAssert.AreEquivalent(oid, (byte[])reader.Value);
-
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.EndObject, reader.TokenType);
-        }
-
-        [Test]
-        public void WriteOidPlusContent()
-        {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
-
-            writer.WriteStartObject();
-            writer.WritePropertyName("_id");
-            writer.WriteObjectId(HexToBytes("4ABBED9D1D8B0F0218000001"));
-            writer.WritePropertyName("test");
-            writer.WriteValue("1234£56");
-            writer.WriteEndObject();
-
-            byte[] expected = HexToBytes("29000000075F6964004ABBED9D1D8B0F02180000010274657374000900000031323334C2A335360000");
-
-            CollectionAssert.AreEquivalent(expected, ms.ToArray());
-        }
-
-        [Test]
         public void WriteRegexPlusContent()
         {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            throw new NotImplementedException();
+            //MemoryStream ms = new MemoryStream();
+            //CborDataWriter writer = new CborDataWriter(ms);
 
-            writer.WriteStartObject();
-            writer.WritePropertyName("regex");
-            writer.WriteRegex("abc", "i");
-            writer.WritePropertyName("test");
-            writer.WriteRegex(string.Empty, null);
-            writer.WriteEndObject();
+            //writer.WriteStartObject();
+            //writer.WritePropertyName("regex");
+            //writer.WriteRegex("abc", "i");
+            //writer.WritePropertyName("test");
+            //writer.WriteRegex(string.Empty, null);
+            //writer.WriteEndObject();
 
-            byte[] expected = HexToBytes("1A-00-00-00-0B-72-65-67-65-78-00-61-62-63-00-69-00-0B-74-65-73-74-00-00-00-00");
+            //byte[] expected = HexToBytes("1A-00-00-00-0B-72-65-67-65-78-00-61-62-63-00-69-00-0B-74-65-73-74-00-00-00-00");
 
-            CollectionAssert.AreEquivalent(expected, ms.ToArray());
+            //CollectionAssert.AreEquivalent(expected, ms.ToArray());
         }
 
         [Test]
@@ -577,12 +526,12 @@ namespace Newtonsoft.Json.Cbor.Tests
             MemoryStream ms = new MemoryStream();
             JsonSerializer serializer = new JsonSerializer();
 
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             serializer.Serialize(writer, p);
 
             ms.Seek(0, SeekOrigin.Begin);
 
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
             Product deserializedProduct = serializer.Deserialize<Product>(reader);
 
             Console.WriteLine(deserializedProduct.Name);
@@ -599,7 +548,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteReadEmptyAndNullStrings()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartArray();
             writer.WriteValue("Content!");
@@ -609,8 +558,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             ms.Seek(0, SeekOrigin.Begin);
 
-            BsonDataReader reader = new BsonDataReader(ms);
-            reader.ReadRootValueAsArray = true;
+            CborDataReader reader = new CborDataReader(ms);
 
             Assert.IsTrue(reader.Read());
             Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
@@ -636,63 +584,49 @@ namespace Newtonsoft.Json.Cbor.Tests
         [Test]
         public void WriteDateTimes()
         {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
-            writer.DateTimeKindHandling = DateTimeKind.Unspecified;
+            throw new NotImplementedException();
+            //MemoryStream ms = new MemoryStream();
+            //CborDataWriter writer = new CborDataWriter(ms);
+            //writer.DateTimeKindHandling = DateTimeKind.Unspecified;
 
-            writer.WriteStartArray();
-            writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc));
-            writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Local));
-            writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Unspecified));
-            writer.WriteEndArray();
+            //writer.WriteStartArray();
+            //writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc));
+            //writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Local));
+            //writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Unspecified));
+            //writer.WriteEndArray();
 
-            ms.Seek(0, SeekOrigin.Begin);
+            //ms.Seek(0, SeekOrigin.Begin);
 
-            BsonDataReader reader = new BsonDataReader(ms);
-            reader.ReadRootValueAsArray = true;
-            reader.DateTimeKindHandling = DateTimeKind.Utc;
+            //CborDataReader reader = new CborDataReader(ms);
+            //reader.ReadRootValueAsArray = true;
+            //reader.DateTimeKindHandling = DateTimeKind.Utc;
 
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
+            //Assert.IsTrue(reader.Read());
+            //Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
 
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            //Assert.IsTrue(reader.Read());
+            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            //Assert.IsTrue(reader.Read());
+            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            //Assert.IsTrue(reader.Read());
+            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            Assert.IsTrue(reader.Read());
-            Assert.AreEqual(JsonToken.EndArray, reader.TokenType);
+            //Assert.IsTrue(reader.Read());
+            //Assert.AreEqual(JsonToken.EndArray, reader.TokenType);
 
-            Assert.IsFalse(reader.Read());
-        }
-
-        [Test]
-        public void WriteValueOutsideOfObjectOrArray()
-        {
-            ExceptionAssert.Throws<JsonWriterException>(() =>
-            {
-                MemoryStream stream = new MemoryStream();
-
-                using (BsonDataWriter writer = new BsonDataWriter(stream))
-                {
-                    writer.WriteValue("test");
-                    writer.Flush();
-                }
-            }, "Error writing String value. BSON must start with an Object or Array. Path ''.");
+            //Assert.IsFalse(reader.Read());
         }
 
         [Test]
         public void DateTimeZoneHandling()
         {
             MemoryStream ms = new MemoryStream();
-            JsonWriter writer = new BsonDataWriter(ms)
+            JsonWriter writer = new CborDataWriter(ms)
             {
                 DateTimeZoneHandling = Json.DateTimeZoneHandling.Utc
             };
@@ -712,30 +646,31 @@ namespace Newtonsoft.Json.Cbor.Tests
         [Test]
         public void SerializeDeserializeRegex()
         {
-            Regex r1 = new Regex("(hi)", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
-            RegexTestClass c = new RegexTestClass { Regex = r1 };
+            throw new NotImplementedException();
+//            Regex r1 = new Regex("(hi)", RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase);
+//            RegexTestClass c = new RegexTestClass { Regex = r1 };
 
-            MemoryStream ms = new MemoryStream();
-            JsonSerializer serializer = new JsonSerializer
-            {
-                Converters =
-                {
-                    new BsonDataRegexConverter()
-                }
-            };
+//            MemoryStream ms = new MemoryStream();
+//            JsonSerializer serializer = new JsonSerializer
+//            {
+//                Converters =
+//                {
+//                    new BsonDataRegexConverter()
+//                }
+//            };
 
-            BsonDataWriter writer = new BsonDataWriter(ms);
-            serializer.Serialize(writer, c);
+//            CborDataWriter writer = new CborDataWriter(ms);
+//            serializer.Serialize(writer, c);
 
-            string hex = BitConverter.ToString(ms.ToArray());
+//            string hex = BitConverter.ToString(ms.ToArray());
 
-            Assert.AreEqual("15-00-00-00-0B-52-65-67-65-78-00-28-68-69-29-00-69-75-78-00-00", hex);
+//            Assert.AreEqual("15-00-00-00-0B-52-65-67-65-78-00-28-68-69-29-00-69-75-78-00-00", hex);
 
-            JObject o = (JObject)JObject.ReadFrom(new BsonDataReader(new MemoryStream(ms.ToArray())));
+//            JObject o = (JObject)JObject.ReadFrom(new CborDataReader(new MemoryStream(ms.ToArray())));
 
-            StringAssert.AreEqual(@"{
-  ""Regex"": ""/(hi)/iux""
-}", o.ToString());
+//            StringAssert.AreEqual(@"{
+//  ""Regex"": ""/(hi)/iux""
+//}", o.ToString());
         }
 
         [Test]
@@ -746,7 +681,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             MemoryStream ms = new MemoryStream();
             JsonSerializer serializer = new JsonSerializer();
 
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             ExceptionAssert.Throws<JsonWriterException>(() => { serializer.Serialize(writer, b); }, "Error writing Binary value. BSON must start with an Object or Array. Path ''.");
         }
@@ -770,12 +705,12 @@ namespace Newtonsoft.Json.Cbor.Tests
             MemoryStream ms = new MemoryStream();
             JsonSerializer serializer = new JsonSerializer();
 
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             serializer.Serialize(writer, c);
 
             ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
 
             GuidTestClass c2 = serializer.Deserialize<GuidTestClass>(reader);
 
@@ -791,12 +726,12 @@ namespace Newtonsoft.Json.Cbor.Tests
             MemoryStream ms = new MemoryStream();
             JsonSerializer serializer = new JsonSerializer();
 
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             serializer.Serialize(writer, c);
 
             ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
 
             GuidTestClass c2 = serializer.Deserialize<GuidTestClass>(reader);
 
@@ -810,7 +745,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             BigInteger i = BigInteger.Parse("1999999999999999999999999999999999999999999999999999999999990");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("Blah");
@@ -821,7 +756,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Assert.AreEqual("2A-00-00-00-05-42-6C-61-68-00-1A-00-00-00-00-F6-FF-FF-FF-FF-FF-FF-1F-B2-21-CB-28-59-84-C4-AE-03-8A-44-34-2F-4C-4E-9E-3E-01-00", bson);
 
             ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
 
             Assert.IsTrue(reader.Read());
             Assert.AreEqual(JsonToken.StartObject, reader.TokenType);
@@ -843,7 +778,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteUri()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("uri0");
@@ -853,7 +788,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             writer.WriteEndObject();
             ms.Seek(0, SeekOrigin.Begin);
 
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
             Assert.IsTrue(reader.Read());
             Assert.AreEqual(JsonToken.StartObject, reader.TokenType);
             Assert.IsTrue(reader.Read());
@@ -868,7 +803,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteByteArray()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("array0");
@@ -878,7 +813,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             writer.WriteEndObject();
             ms.Seek(0, SeekOrigin.Begin);
 
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
             Assert.IsTrue(reader.Read());
             Assert.AreEqual(JsonToken.StartObject, reader.TokenType);
             Assert.IsTrue(reader.Read());
@@ -893,7 +828,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteEndOnProperty()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("Blah");
@@ -906,7 +841,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteEndOnProperty_Close()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("Blah");
@@ -919,7 +854,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteEndOnProperty_Dispose()
         {
             MemoryStream ms = new MemoryStream();
-            using (BsonDataWriter writer = new BsonDataWriter(ms))
+            using (CborDataWriter writer = new CborDataWriter(ms))
             {
                 writer.WriteStartObject();
                 writer.WritePropertyName("Blah");
@@ -932,7 +867,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void AutoCompleteOnClose_False()
         {
             MemoryStream ms = new MemoryStream();
-            using (BsonDataWriter writer = new BsonDataWriter(ms))
+            using (CborDataWriter writer = new CborDataWriter(ms))
             {
                 writer.AutoCompleteOnClose = false;
 

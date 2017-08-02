@@ -3,26 +3,28 @@
     <TargetFrameworks Condition="'$(LibraryFrameworks)'==''">net45;netstandard1.3</TargetFrameworks>
     <TargetFrameworks Condition="'$(LibraryFrameworks)'!=''">$(LibraryFrameworks)</TargetFrameworks>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.1</FileVersion>
+    <FileVersion>0.0.2</FileVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
-    <Authors>James Newton-King</Authors>
+    <Authors>James Newton-King, Roman Vaughan</Authors>
     <Company>Newtonsoft</Company>
-    <Product>Json.NET BSON</Product>
-    <Description>Json.NET BSON adds support for reading and writing BSON</Description>
+    <Product>Json.NET CBOR</Product>
+    <Description>Json.NET CBOR adds support for reading and writing BSON</Description>
     <Copyright>Copyright © James Newton-King 2017</Copyright>
     <Summary>Json.NET BSON adds support for reading and writing BSON</Summary>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <PackageId>Newtonsoft.Json.Bson</PackageId>
-    <PackageTags>bson</PackageTags>
+    <PackageId>Newtonsoft.Json.Cbor</PackageId>
+    <PackageTags>cbor</PackageTags>
     <PackageIconUrl>http://www.newtonsoft.com/content/images/nugeticon.png</PackageIconUrl>
     <PackageProjectUrl>http://www.newtonsoft.com/json</PackageProjectUrl>
     <PackageLicenseUrl>https://raw.github.com/JamesNK/Newtonsoft.Json.Bson/master/LICENSE.md</PackageLicenseUrl>
-    <RepositoryUrl>https://github.com/JamesNK/Newtonsoft.Json.Bson</RepositoryUrl>
+    <RepositoryUrl>https://github.com/NZSmartie/Newtonsoft.Json.Cbor</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyName>Newtonsoft.Json.Cbor</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>0.2</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />

@@ -783,7 +783,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteAndReadEmptyListsAndDictionariesAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("Arguments");
@@ -837,7 +837,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             //DateTime value = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Unspecified);
 
             //MemoryStream ms = new MemoryStream();
-            //BsonDataWriter writer = new BsonDataWriter(ms);
+            //CborDataWriter writer = new CborDataWriter(ms);
             //writer.DateTimeKindHandling = DateTimeKind.Unspecified;
 
             //await writer.WriteStartObjectAsync();
@@ -858,7 +858,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             DateTime value = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("DateTime");
@@ -875,7 +875,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         private async Task<string> WriteAndReadStringValueAsync(string val)
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter bs = new BsonDataWriter(ms);
+            CborDataWriter bs = new CborDataWriter(ms);
             await bs.WriteStartObjectAsync();
             await bs.WritePropertyNameAsync("StringValue");
             await bs.WriteValueAsync(val);
@@ -896,7 +896,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         private async Task<string> WriteAndReadStringPropertyNameAsync(string val)
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter bs = new BsonDataWriter(ms);
+            CborDataWriter bs = new CborDataWriter(ms);
             await bs.WriteStartObjectAsync();
             await bs.WritePropertyNameAsync(val);
             await bs.WriteValueAsync("Dummy");
@@ -1116,7 +1116,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 }";
             JObject parsed = JObject.Parse(doc);
             var memoryStream = new MemoryStream();
-            var bsonWriter = new BsonDataWriter(memoryStream);
+            var bsonWriter = new CborDataWriter(memoryStream);
             parsed.WriteTo(bsonWriter);
             await bsonWriter.FlushAsync();
             memoryStream.Position = 0;
@@ -1161,7 +1161,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 }";
             JObject parsed = JObject.Parse(json);
             var memoryStream = new MemoryStream();
-            var bsonWriter = new BsonDataWriter(memoryStream);
+            var bsonWriter = new CborDataWriter(memoryStream);
             parsed.WriteTo(bsonWriter);
             await bsonWriter.FlushAsync();
             memoryStream.Position = 0;
@@ -1189,7 +1189,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("822C0CE6-CC42-4753-A3C3-26F0684A4B88");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("TheGuid");
             await writer.WriteValueAsync(g);
@@ -1223,7 +1223,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("822C0CE6-CC42-4753-A3C3-26F0684A4B88");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("TheGuid");
             await writer.WriteValueAsync(g);
@@ -1255,7 +1255,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("822C0CE6-CC42-4753-A3C3-26F0684A4B88");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("TheGuid");
             await writer.WriteValueAsync(g);

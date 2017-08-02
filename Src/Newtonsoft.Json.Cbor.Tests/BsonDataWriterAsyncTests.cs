@@ -51,14 +51,14 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task CloseOutputAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             Assert.IsTrue(ms.CanRead);
             await writer.CloseAsync();
             Assert.IsFalse(ms.CanRead);
 
             ms = new MemoryStream();
-            writer = new BsonDataWriter(ms) { CloseOutput = false };
+            writer = new CborDataWriter(ms) { CloseOutput = false };
 
             Assert.IsTrue(ms.CanRead);
             await writer.CloseAsync();
@@ -69,7 +69,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteSingleObjectAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("Blah");
@@ -84,7 +84,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteValuesAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartArrayAsync();
             await writer.WriteValueAsync(long.MaxValue);
@@ -111,7 +111,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteDoubleAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartArrayAsync();
             await writer.WriteValueAsync(99.99d);
@@ -127,7 +127,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("D821EED7-4B5C-43C9-8AC2-6928E579B705");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartArrayAsync();
             await writer.WriteValueAsync(g);
@@ -141,7 +141,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteArrayBsonFromSiteAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             await writer.WriteStartArrayAsync();
             await writer.WriteValueAsync("a");
             await writer.WriteValueAsync("b");
@@ -164,7 +164,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             byte[] data = Encoding.UTF8.GetBytes("Hello world!");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             await writer.WriteStartArrayAsync();
             await writer.WriteValueAsync("a");
             await writer.WriteValueAsync("b");
@@ -180,8 +180,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             Assert.AreEqual(expected, bson);
 
-            BsonDataReader reader = new BsonDataReader(new MemoryStream(ms.ToArray()));
-            reader.ReadRootValueAsArray = true;
+            CborDataReader reader = new CborDataReader(new MemoryStream(ms.ToArray()));
             await reader.ReadAsync();
             await reader.ReadAsync();
             await reader.ReadAsync();
@@ -194,7 +193,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteNestedArrayAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             await writer.WriteStartObjectAsync();
 
             await writer.WritePropertyNameAsync("_id");
@@ -231,7 +230,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteLargeStringsAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             StringBuilder largeStringBuilder = new StringBuilder();
             for (int i = 0; i < 100; i++)
@@ -258,7 +257,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task WriteEmptyStringsAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("");
@@ -275,7 +274,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             await ExceptionAssert.ThrowsAsync<JsonWriterException>(async () =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 await writer.WriteStartArrayAsync();
                 await writer.WriteCommentAsync("fail");
@@ -288,7 +287,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             await ExceptionAssert.ThrowsAsync<JsonWriterException>(async () =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 await writer.WriteStartArrayAsync();
                 await writer.WriteStartConstructorAsync("fail");
@@ -301,7 +300,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             await ExceptionAssert.ThrowsAsync<JsonWriterException>(async () =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 await writer.WriteStartArrayAsync();
                 await writer.WriteRawAsync("fail");
@@ -314,7 +313,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             await ExceptionAssert.ThrowsAsync<JsonWriterException>(async () =>
             {
                 MemoryStream ms = new MemoryStream();
-                BsonDataWriter writer = new BsonDataWriter(ms);
+                CborDataWriter writer = new CborDataWriter(ms);
 
                 await writer.WriteStartArrayAsync();
                 await writer.WriteRawValueAsync("fail");
@@ -322,79 +321,29 @@ namespace Newtonsoft.Json.Cbor.Tests
         }
 
         [Test]
-        public async Task WriteOidAsync()
-        {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
-
-            byte[] oid = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-
-            await writer.WriteStartObjectAsync();
-            await writer.WritePropertyNameAsync("_oid");
-            writer.WriteObjectId(oid);
-            await writer.WriteEndObjectAsync();
-
-            string bson = BytesToHex(ms.ToArray());
-            Assert.AreEqual("17-00-00-00-07-5F-6F-69-64-00-01-02-03-04-05-06-07-08-09-0A-0B-0C-00", bson);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
-
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.StartObject, reader.TokenType);
-
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.PropertyName, reader.TokenType);
-
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.Bytes, reader.TokenType);
-            CollectionAssert.AreEquivalent(oid, (byte[])reader.Value);
-
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.EndObject, reader.TokenType);
-        }
-
-        [Test]
-        public async Task WriteOidPlusContentAsync()
-        {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
-
-            await writer.WriteStartObjectAsync();
-            await writer.WritePropertyNameAsync("_id");
-            writer.WriteObjectId(HexToBytes("4ABBED9D1D8B0F0218000001"));
-            await writer.WritePropertyNameAsync("test");
-            await writer.WriteValueAsync("1234£56");
-            await writer.WriteEndObjectAsync();
-
-            byte[] expected = HexToBytes("29000000075F6964004ABBED9D1D8B0F02180000010274657374000900000031323334C2A335360000");
-
-            CollectionAssert.AreEquivalent(expected, ms.ToArray());
-        }
-
-        [Test]
         public async Task WriteRegexPlusContentAsync()
         {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            throw new NotImplementedException();
+            //MemoryStream ms = new MemoryStream();
+            //CborDataWriter writer = new CborDataWriter(ms);
 
-            await writer.WriteStartObjectAsync();
-            await writer.WritePropertyNameAsync("regex");
-            writer.WriteRegex("abc", "i");
-            await writer.WritePropertyNameAsync("test");
-            writer.WriteRegex(string.Empty, null);
-            await writer.WriteEndObjectAsync();
+            //await writer.WriteStartObjectAsync();
+            //await writer.WritePropertyNameAsync("regex");
+            //writer.WriteRegex("abc", "i");
+            //await writer.WritePropertyNameAsync("test");
+            //writer.WriteRegex(string.Empty, null);
+            //await writer.WriteEndObjectAsync();
 
-            byte[] expected = HexToBytes("1A-00-00-00-0B-72-65-67-65-78-00-61-62-63-00-69-00-0B-74-65-73-74-00-00-00-00");
+            //byte[] expected = HexToBytes("1A-00-00-00-0B-72-65-67-65-78-00-61-62-63-00-69-00-0B-74-65-73-74-00-00-00-00");
 
-            CollectionAssert.AreEquivalent(expected, ms.ToArray());
+            //CollectionAssert.AreEquivalent(expected, ms.ToArray());
         }
 
         [Test]
         public async Task WriteReadEmptyAndNullStringsAsync()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartArrayAsync();
             await writer.WriteValueAsync("Content!");
@@ -404,8 +353,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             ms.Seek(0, SeekOrigin.Begin);
 
-            BsonDataReader reader = new BsonDataReader(ms);
-            reader.ReadRootValueAsArray = true;
+            CborDataReader reader = new CborDataReader(ms);
 
             Assert.IsTrue(await reader.ReadAsync());
             Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
@@ -431,41 +379,42 @@ namespace Newtonsoft.Json.Cbor.Tests
         [Test]
         public async Task WriteDateTimesAsync()
         {
-            MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
-            writer.DateTimeKindHandling = DateTimeKind.Unspecified;
+            throw new NotImplementedException();
+            //MemoryStream ms = new MemoryStream();
+            //CborDataWriter writer = new CborDataWriter(ms);
+            //writer.DateTimeKindHandling = DateTimeKind.Unspecified;
 
-            await writer.WriteStartArrayAsync();
-            await writer.WriteValueAsync(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc));
-            await writer.WriteValueAsync(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Local));
-            await writer.WriteValueAsync(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Unspecified));
-            await writer.WriteEndArrayAsync();
+            //await writer.WriteStartArrayAsync();
+            //await writer.WriteValueAsync(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc));
+            //await writer.WriteValueAsync(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Local));
+            //await writer.WriteValueAsync(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Unspecified));
+            //await writer.WriteEndArrayAsync();
 
-            ms.Seek(0, SeekOrigin.Begin);
+            //ms.Seek(0, SeekOrigin.Begin);
 
-            BsonDataReader reader = new BsonDataReader(ms);
-            reader.ReadRootValueAsArray = true;
-            reader.DateTimeKindHandling = DateTimeKind.Utc;
+            //CborDataReader reader = new CborDataReader(ms);
+            //reader.ReadRootValueAsArray = true;
+            //reader.DateTimeKindHandling = DateTimeKind.Utc;
 
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
+            //Assert.IsTrue(await reader.ReadAsync());
+            //Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
 
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            //Assert.IsTrue(await reader.ReadAsync());
+            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            //Assert.IsTrue(await reader.ReadAsync());
+            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            //Assert.IsTrue(await reader.ReadAsync());
+            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            Assert.IsTrue(await reader.ReadAsync());
-            Assert.AreEqual(JsonToken.EndArray, reader.TokenType);
+            //Assert.IsTrue(await reader.ReadAsync());
+            //Assert.AreEqual(JsonToken.EndArray, reader.TokenType);
 
-            Assert.IsFalse(await reader.ReadAsync());
+            //Assert.IsFalse(await reader.ReadAsync());
         }
 
         [Test]
@@ -475,7 +424,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             {
                 MemoryStream stream = new MemoryStream();
 
-                using (BsonDataWriter writer = new BsonDataWriter(stream))
+                using (CborDataWriter writer = new CborDataWriter(stream))
                 {
                     await writer.WriteValueAsync("test");
                     await writer.FlushAsync();
@@ -487,7 +436,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public async Task DateTimeZoneHandlingAsync()
         {
             MemoryStream ms = new MemoryStream();
-            JsonWriter writer = new BsonDataWriter(ms)
+            JsonWriter writer = new CborDataWriter(ms)
             {
                 DateTimeZoneHandling = DateTimeZoneHandling.Utc
             };
@@ -506,7 +455,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             BigInteger i = BigInteger.Parse("1999999999999999999999999999999999999999999999999999999999990");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             await writer.WriteStartObjectAsync();
             await writer.WritePropertyNameAsync("Blah");
@@ -517,7 +466,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Assert.AreEqual("2A-00-00-00-05-42-6C-61-68-00-1A-00-00-00-00-F6-FF-FF-FF-FF-FF-FF-1F-B2-21-CB-28-59-84-C4-AE-03-8A-44-34-2F-4C-4E-9E-3E-01-00", bson);
 
             ms.Seek(0, SeekOrigin.Begin);
-            BsonDataReader reader = new BsonDataReader(ms);
+            CborDataReader reader = new CborDataReader(ms);
 
             Assert.IsTrue(await reader.ReadAsync());
             Assert.AreEqual(JsonToken.StartObject, reader.TokenType);

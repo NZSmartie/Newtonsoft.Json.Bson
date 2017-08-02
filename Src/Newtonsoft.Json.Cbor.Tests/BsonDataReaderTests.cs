@@ -78,7 +78,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void Bson_SupportMultipleContent()
         {
             MemoryStream myStream = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(myStream);
+            CborDataWriter writer = new CborDataWriter(myStream);
             JsonSerializer serializer = new JsonSerializer();
             MyTest tst1 = new MyTest
             {
@@ -550,7 +550,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Assert.AreEqual(3, o.Count);
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             o.WriteTo(writer);
             writer.Flush();
 
@@ -719,7 +719,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         public void WriteAndReadEmptyListsAndDictionaries()
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("Arguments");
@@ -772,7 +772,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             DateTime value = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("DateTime");
@@ -804,7 +804,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             //DateTime value = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Unspecified);
 
             //MemoryStream ms = new MemoryStream();
-            //BsonDataWriter writer = new BsonDataWriter(ms);
+            //CborDataWriter writer = new CborDataWriter(ms);
             //writer.DateTimeKindHandling = DateTimeKind.Unspecified;
 
             //writer.WriteStartObject();
@@ -828,7 +828,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             DateTime value = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Local);
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
 
             writer.WriteStartObject();
             writer.WritePropertyName("DateTime");
@@ -848,7 +848,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         private string WriteAndReadStringValue(string val)
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter bs = new BsonDataWriter(ms);
+            CborDataWriter bs = new CborDataWriter(ms);
             bs.WriteStartObject();
             bs.WritePropertyName("StringValue");
             bs.WriteValue(val);
@@ -869,7 +869,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         private string WriteAndReadStringPropertyName(string val)
         {
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter bs = new BsonDataWriter(ms);
+            CborDataWriter bs = new CborDataWriter(ms);
             bs.WriteStartObject();
             bs.WritePropertyName(val);
             bs.WriteValue("Dummy");
@@ -1125,7 +1125,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 }";
             JObject parsed = JObject.Parse(json);
             var memoryStream = new MemoryStream();
-            var bsonWriter = new BsonDataWriter(memoryStream);
+            var bsonWriter = new CborDataWriter(memoryStream);
             parsed.WriteTo(bsonWriter);
             bsonWriter.Flush();
             memoryStream.Position = 0;
@@ -1152,7 +1152,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             UriGuidTimeSpanTestClass c1 = new UriGuidTimeSpanTestClass();
 
             var memoryStream = new MemoryStream();
-            var bsonWriter = new BsonDataWriter(memoryStream);
+            var bsonWriter = new CborDataWriter(memoryStream);
             JsonSerializer serializer = new JsonSerializer();
             serializer.Serialize(bsonWriter, c1);
             bsonWriter.Flush();
@@ -1180,7 +1180,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             };
 
             var memoryStream = new MemoryStream();
-            var bsonWriter = new BsonDataWriter(memoryStream);
+            var bsonWriter = new CborDataWriter(memoryStream);
             JsonSerializer serializer = new JsonSerializer();
             serializer.Serialize(bsonWriter, c1);
             bsonWriter.Flush();
@@ -1206,7 +1206,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             byte[] objectBytes;
             using (MemoryStream bsonStream = new MemoryStream())
-            using (JsonWriter bsonWriter = new BsonDataWriter(bsonStream))
+            using (JsonWriter bsonWriter = new CborDataWriter(bsonStream))
             {
                 serializer.Serialize(bsonWriter, test);
                 bsonWriter.Flush();
@@ -1232,7 +1232,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             j["test"] = badText;
 
             var memoryStream = new MemoryStream();
-            var bsonWriter = new BsonDataWriter(memoryStream);
+            var bsonWriter = new CborDataWriter(memoryStream);
             j.WriteTo(bsonWriter);
             bsonWriter.Flush();
 
@@ -1381,7 +1381,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             JsonSerializer serializer = JsonSerializer.Create(settings);
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter bsonWriter = new BsonDataWriter(ms);
+            CborDataWriter bsonWriter = new CborDataWriter(ms);
             serializer.Serialize(bsonWriter, zoo);
 
             ms.Seek(0, SeekOrigin.Begin);
@@ -1404,7 +1404,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("822C0CE6-CC42-4753-A3C3-26F0684A4B88");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             writer.WriteStartObject();
             writer.WritePropertyName("TheGuid");
             writer.WriteValue(g);
@@ -1438,7 +1438,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("822C0CE6-CC42-4753-A3C3-26F0684A4B88");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             writer.WriteStartObject();
             writer.WritePropertyName("TheGuid");
             writer.WriteValue(g);
@@ -1470,7 +1470,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             Guid g = new Guid("822C0CE6-CC42-4753-A3C3-26F0684A4B88");
 
             MemoryStream ms = new MemoryStream();
-            BsonDataWriter writer = new BsonDataWriter(ms);
+            CborDataWriter writer = new CborDataWriter(ms);
             writer.WriteStartObject();
             writer.WritePropertyName("TheGuid");
             writer.WriteValue(g);
