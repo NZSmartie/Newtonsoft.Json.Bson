@@ -83,9 +83,9 @@ namespace Newtonsoft.Json.Bson
             return (await ReadBufferAsync(1, cancellationToken).ConfigureAwait(false))[0];
         }
 
-        public async Task<BsonType> ReadBsonTypeAsync(CancellationToken cancellationToken)
+        public async Task<CborMajorType> ReadBsonTypeAsync(CancellationToken cancellationToken)
         {
-            return (BsonType)(await ReadBufferAsync(1, cancellationToken).ConfigureAwait(false))[0];
+            return (CborMajorType)(await ReadBufferAsync(1, cancellationToken).ConfigureAwait(false))[0];
         }
 
         public async Task<long> ReadInt64Async(CancellationToken cancellationToken)

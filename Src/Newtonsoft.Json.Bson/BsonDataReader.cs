@@ -36,50 +36,21 @@ namespace Newtonsoft.Json.Bson
     /// <summary>
     /// Represents a reader that provides fast, non-cached, forward-only access to serialized BSON data.
     /// </summary>
-    public partial class BsonDataReader : JsonReader
+    public partial class CborDataReader : JsonReader
     {
-        private const int MaxCharBytesSize = 128;
-        private static readonly byte[] SeqRange1 = new byte[] { 0, 127 }; // range of 1-byte sequence
-        private static readonly byte[] SeqRange2 = new byte[] { 194, 223 }; // range of 2-byte sequence
-        private static readonly byte[] SeqRange3 = new byte[] { 224, 239 }; // range of 3-byte sequence
-        private static readonly byte[] SeqRange4 = new byte[] { 240, 244 }; // range of 4-byte sequence
-
         private readonly BinaryReader _reader;
         private readonly List<ContainerContext> _stack;
 
-        private byte[] _byteBuffer;
-        private char[] _charBuffer;
-
-        private BsonType _currentElementType;
-        private BsonReaderState _bsonReaderState;
         private ContainerContext _currentContext;
-
-        private bool _readRootValueAsArray;
-        private bool _jsonNet35BinaryCompatibility;
-        private DateTimeKind _dateTimeKindHandling;
-
-        private enum BsonReaderState
-        {
-            Normal = 0,
-            ReferenceStart = 1,
-            ReferenceRef = 2,
-            ReferenceId = 3,
-            CodeWScopeStart = 4,
-            CodeWScopeCode = 5,
-            CodeWScopeScope = 6,
-            CodeWScopeScopeObject = 7,
-            CodeWScopeScopeEnd = 8
-        }
 
         private class ContainerContext
         {
-            public readonly BsonType Type;
+            public readonly CborMajorType MajorType;
             public int Length;
-            public int Position;
 
-            public ContainerContext(BsonType type)
+            public ContainerContext(CborMajorType majorType)
             {
-                Type = type;
+                MajorType = majorType;
             }
         }
 
@@ -90,101 +61,71 @@ namespace Newtonsoft.Json.Bson
         /// 	<c>true</c> if binary data reading will be compatible with incorrect Json.NET 3.5 written binary; otherwise, <c>false</c>.
         /// </value>
         [Obsolete("JsonNet35BinaryCompatibility will be removed in a future version of Json.NET.")]
-        public bool JsonNet35BinaryCompatibility
-        {
-            get { return _jsonNet35BinaryCompatibility; }
-            set { _jsonNet35BinaryCompatibility = value; }
-        }
+        public bool JsonNet35BinaryCompatibility { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the root object will be read as a JSON array.
-        /// </summary>
-        /// <value>
-        /// 	<c>true</c> if the root object will be read as a JSON array; otherwise, <c>false</c>.
-        /// </value>
-        public bool ReadRootValueAsArray
-        {
-            get { return _readRootValueAsArray; }
-            set { _readRootValueAsArray = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="DateTimeKind" /> used when reading <see cref="DateTime"/> values from BSON.
+        /// Gets or sets the default <see cref="DateTimeKind" /> used when reading <see cref="DateTime"/> values from Cbor.
         /// </summary>
         /// <value>The <see cref="DateTimeKind" /> used when reading <see cref="DateTime"/> values from BSON.</value>
-        public DateTimeKind DateTimeKindHandling
-        {
-            get { return _dateTimeKindHandling; }
-            set { _dateTimeKindHandling = value; }
-        }
+        public DateTimeKind DateTimeKindHandling { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BsonDataReader"/> class.
+        /// Initializes a new instance of the <see cref="CborDataReader"/> class.
         /// </summary>
         /// <param name="stream">The <see cref="Stream"/> containing the BSON data to read.</param>
-        public BsonDataReader(Stream stream)
-            : this(stream, false, DateTimeKind.Local)
+        public CborDataReader(Stream stream)
+            : this(stream, DateTimeKind.Local)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BsonDataReader"/> class.
+        /// Initializes a new instance of the <see cref="CborDataReader"/> class.
         /// </summary>
         /// <param name="reader">The <see cref="BinaryReader"/> containing the BSON data to read.</param>
-        public BsonDataReader(BinaryReader reader)
-            : this(reader, false, DateTimeKind.Local)
+        public CborDataReader(BinaryReader reader)
+            : this(reader, DateTimeKind.Local)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BsonDataReader"/> class.
+        /// Initializes a new instance of the <see cref="CborDataReader"/> class.
         /// </summary>
         /// <param name="stream">The <see cref="Stream"/> containing the BSON data to read.</param>
         /// <param name="readRootValueAsArray">if set to <c>true</c> the root object will be read as a JSON array.</param>
         /// <param name="dateTimeKindHandling">The <see cref="DateTimeKind" /> used when reading <see cref="DateTime"/> values from BSON.</param>
-        public BsonDataReader(Stream stream, bool readRootValueAsArray, DateTimeKind dateTimeKindHandling)
+        public CborDataReader(Stream stream, DateTimeKind dateTimeKindHandling)
         {
             ValidationUtils.ArgumentNotNull(stream, nameof(stream));
             _stack = new List<ContainerContext>();
-            _readRootValueAsArray = readRootValueAsArray;
-            _dateTimeKindHandling = dateTimeKindHandling;
-#if HAVE_ASYNC
-            if (GetType() == typeof(BsonDataReader))
-            {
-                _reader = _asyncReader = new AsyncBinaryReader(stream);
-                return;
-            }
-#endif
+            DateTimeKindHandling = dateTimeKindHandling;
+//#if HAVE_ASYNC
+//            if (GetType() == typeof(CborDataReader))
+//            {
+//                _reader = _asyncReader = new AsyncBinaryReader(stream);
+//                return;
+//            }
+//#endif
             _reader = new BinaryReader(stream);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BsonDataReader"/> class.
+        /// Initializes a new instance of the <see cref="CborDataReader"/> class.
         /// </summary>
         /// <param name="reader">The <see cref="BinaryReader"/> containing the BSON data to read.</param>
-        /// <param name="readRootValueAsArray">if set to <c>true</c> the root object will be read as a JSON array.</param>
         /// <param name="dateTimeKindHandling">The <see cref="DateTimeKind" /> used when reading <see cref="DateTime"/> values from BSON.</param>
-        public BsonDataReader(BinaryReader reader, bool readRootValueAsArray, DateTimeKind dateTimeKindHandling)
+        public CborDataReader(BinaryReader reader, DateTimeKind dateTimeKindHandling)
         {
             ValidationUtils.ArgumentNotNull(reader, nameof(reader));
             _stack = new List<ContainerContext>();
-            _readRootValueAsArray = readRootValueAsArray;
-            _dateTimeKindHandling = dateTimeKindHandling;
-#if HAVE_ASYNC
-            if (GetType() == typeof(BsonDataReader) && reader.GetType() == typeof(BinaryWriter))
-            {
-                _reader = _asyncReader = new AsyncBinaryReaderOwningReader(reader);
-                return;
-            }
-#endif
+            DateTimeKindHandling = dateTimeKindHandling;
+//#if HAVE_ASYNC
+//            if (GetType() == typeof(CborDataReader) && reader.GetType() == typeof(BinaryWriter))
+//            {
+//                _reader = _asyncReader = new AsyncBinaryReaderOwningReader(reader);
+//                return;
+//            }
+//#endif
             _reader = reader;
-        }
-
-        private string ReadElement()
-        {
-            _currentElementType = ReadType();
-            string elementName = ReadString();
-            return elementName;
         }
 
         /// <summary>
@@ -197,36 +138,27 @@ namespace Newtonsoft.Json.Bson
         {
             try
             {
-                bool success;
-
-                switch (_bsonReaderState)
+                if (CurrentState == State.PostValue)
+                    SetStateBasedOnCurrent();
+                
+                switch (CurrentState)
                 {
-                    case BsonReaderState.Normal:
-                        success = ReadNormal();
-                        break;
-                    case BsonReaderState.ReferenceStart:
-                    case BsonReaderState.ReferenceRef:
-                    case BsonReaderState.ReferenceId:
-                        success = ReadReference();
-                        break;
-                    case BsonReaderState.CodeWScopeStart:
-                    case BsonReaderState.CodeWScopeCode:
-                    case BsonReaderState.CodeWScopeScope:
-                    case BsonReaderState.CodeWScopeScopeObject:
-                    case BsonReaderState.CodeWScopeScopeEnd:
-                        success = ReadCodeWScope();
-                        break;
+                    case State.Start:
+                    case State.Property:
+                    case State.Array:
+                    case State.ArrayStart:
+                    case State.Constructor:
+                    case State.ConstructorStart:
+                        return ParseValue();
+                    case State.Object:
+                    case State.ObjectStart:
+                        return ParsePropertyName();
+                    case State.Finished:
+                        SetToken(JsonToken.None);
+                        return false;
                     default:
-                        throw ExceptionUtils.CreateJsonReaderException(this, "Unexpected state: {0}".FormatWith(CultureInfo.InvariantCulture, _bsonReaderState));
+                        throw new JsonReaderException($"Unexpected state: {CurrentState}.");
                 }
-
-                if (!success)
-                {
-                    SetToken(JsonToken.None);
-                    return false;
-                }
-
-                return true;
             }
             catch (EndOfStreamException)
             {
@@ -253,190 +185,6 @@ namespace Newtonsoft.Json.Bson
             }
         }
 
-        private bool ReadCodeWScope()
-        {
-            switch (_bsonReaderState)
-            {
-                case BsonReaderState.CodeWScopeStart:
-                    SetToken(JsonToken.PropertyName, "$code");
-                    _bsonReaderState = BsonReaderState.CodeWScopeCode;
-                    return true;
-                case BsonReaderState.CodeWScopeCode:
-                    // total CodeWScope size - not used
-                    ReadInt32();
-
-                    SetToken(JsonToken.String, ReadLengthString());
-                    _bsonReaderState = BsonReaderState.CodeWScopeScope;
-                    return true;
-                case BsonReaderState.CodeWScopeScope:
-                    if (CurrentState == State.PostValue)
-                    {
-                        SetToken(JsonToken.PropertyName, "$scope");
-                        return true;
-                    }
-                    else
-                    {
-                        SetToken(JsonToken.StartObject);
-                        _bsonReaderState = BsonReaderState.CodeWScopeScopeObject;
-
-                        ContainerContext newContext = new ContainerContext(BsonType.Object);
-                        PushContext(newContext);
-                        newContext.Length = ReadInt32();
-
-                        return true;
-                    }
-                case BsonReaderState.CodeWScopeScopeObject:
-                    bool result = ReadNormal();
-                    if (result && TokenType == JsonToken.EndObject)
-                    {
-                        _bsonReaderState = BsonReaderState.CodeWScopeScopeEnd;
-                    }
-
-                    return result;
-                case BsonReaderState.CodeWScopeScopeEnd:
-                    SetToken(JsonToken.EndObject);
-                    _bsonReaderState = BsonReaderState.Normal;
-                    return true;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        private bool ReadReference()
-        {
-            switch (CurrentState)
-            {
-                case State.ObjectStart:
-                {
-                    SetToken(JsonToken.PropertyName, "$ref");
-                    _bsonReaderState = BsonReaderState.ReferenceRef;
-                    return true;
-                }
-                case State.Property:
-                {
-                    if (_bsonReaderState == BsonReaderState.ReferenceRef)
-                    {
-                        SetToken(JsonToken.String, ReadLengthString());
-                        return true;
-                    }
-                    else if (_bsonReaderState == BsonReaderState.ReferenceId)
-                    {
-                        SetToken(JsonToken.Bytes, ReadBytes(12));
-                        return true;
-                    }
-                    else
-                    {
-                        throw ExceptionUtils.CreateJsonReaderException(this, "Unexpected state when reading BSON reference: " + _bsonReaderState);
-                    }
-                }
-                case State.PostValue:
-                {
-                    if (_bsonReaderState == BsonReaderState.ReferenceRef)
-                    {
-                        SetToken(JsonToken.PropertyName, "$id");
-                        _bsonReaderState = BsonReaderState.ReferenceId;
-                        return true;
-                    }
-                    else if (_bsonReaderState == BsonReaderState.ReferenceId)
-                    {
-                        SetToken(JsonToken.EndObject);
-                        _bsonReaderState = BsonReaderState.Normal;
-                        return true;
-                    }
-                    else
-                    {
-                        throw ExceptionUtils.CreateJsonReaderException(this, "Unexpected state when reading BSON reference: " + _bsonReaderState);
-                    }
-                }
-                default:
-                    throw ExceptionUtils.CreateJsonReaderException(this, "Unexpected state when reading BSON reference: " + CurrentState);
-            }
-        }
-
-        private bool ReadNormal()
-        {
-            switch (CurrentState)
-            {
-                case State.Start:
-                {
-                    JsonToken token = (!_readRootValueAsArray) ? JsonToken.StartObject : JsonToken.StartArray;
-                    BsonType type = (!_readRootValueAsArray) ? BsonType.Object : BsonType.Array;
-
-                    SetToken(token);
-                    ContainerContext newContext = new ContainerContext(type);
-                    PushContext(newContext);
-                    newContext.Length = ReadInt32();
-                    return true;
-                }
-                case State.Complete:
-                case State.Closed:
-                    return false;
-                case State.Property:
-                {
-                    ReadType(_currentElementType);
-                    return true;
-                }
-                case State.ObjectStart:
-                case State.ArrayStart:
-                case State.PostValue:
-                    ContainerContext context = _currentContext;
-                    if (context == null)
-                    {
-                        return false;
-                    }
-
-                    int lengthMinusEnd = context.Length - 1;
-
-                    if (context.Position < lengthMinusEnd)
-                    {
-                        if (context.Type == BsonType.Array)
-                        {
-                            ReadElement();
-                            ReadType(_currentElementType);
-                            return true;
-                        }
-                        else
-                        {
-                            SetToken(JsonToken.PropertyName, ReadElement());
-                            return true;
-                        }
-                    }
-                    else if (context.Position == lengthMinusEnd)
-                    {
-                        if (ReadByte() != 0)
-                        {
-                            throw ExceptionUtils.CreateJsonReaderException(this, "Unexpected end of object byte value.");
-                        }
-
-                        PopContext();
-                        if (_currentContext != null)
-                        {
-                            MovePosition(context.Length);
-                        }
-
-                        JsonToken endToken = (context.Type == BsonType.Object) ? JsonToken.EndObject : JsonToken.EndArray;
-                        SetToken(endToken);
-                        return true;
-                    }
-                    else
-                    {
-                        throw ExceptionUtils.CreateJsonReaderException(this, "Read past end of current container context.");
-                    }
-                case State.ConstructorStart:
-                    break;
-                case State.Constructor:
-                    break;
-                case State.Error:
-                    break;
-                case State.Finished:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            return false;
-        }
-
         private void PopContext()
         {
             _stack.RemoveAt(_stack.Count - 1);
@@ -456,386 +204,281 @@ namespace Newtonsoft.Json.Bson
             _currentContext = newContext;
         }
 
-        private byte ReadByte()
+        private bool ParseValue()
         {
-            MovePosition(1);
-            return _reader.ReadByte();
-        }
-
-        private void ReadType(BsonType type)
-        {
-            switch (type)
-            {
-                case BsonType.Number:
-                    double d = ReadDouble();
-
-                    if (FloatParseHandling == FloatParseHandling.Decimal)
-                    {
-                        SetToken(JsonToken.Float, Convert.ToDecimal(d, CultureInfo.InvariantCulture));
-                    }
-                    else
-                    {
-                        SetToken(JsonToken.Float, d);
-                    }
-                    break;
-                case BsonType.String:
-                case BsonType.Symbol:
-                    SetToken(JsonToken.String, ReadLengthString());
-                    break;
-                case BsonType.Object:
-                {
-                    SetToken(JsonToken.StartObject);
-
-                    ContainerContext newContext = new ContainerContext(BsonType.Object);
-                    PushContext(newContext);
-                    newContext.Length = ReadInt32();
-                    break;
-                }
-                case BsonType.Array:
-                {
-                    SetToken(JsonToken.StartArray);
-
-                    ContainerContext newContext = new ContainerContext(BsonType.Array);
-                    PushContext(newContext);
-                    newContext.Length = ReadInt32();
-                    break;
-                }
-                case BsonType.Binary:
-                    BsonBinaryType binaryType;
-                    byte[] data = ReadBinary(out binaryType);
-
-                    object value = (binaryType != BsonBinaryType.Uuid)
-                        ? data
-                        : (object)new Guid(data);
-
-                    SetToken(JsonToken.Bytes, value);
-                    break;
-                case BsonType.Undefined:
-                    SetToken(JsonToken.Undefined);
-                    break;
-                case BsonType.Oid:
-                    byte[] oid = ReadBytes(12);
-                    SetToken(JsonToken.Bytes, oid);
-                    break;
-                case BsonType.Boolean:
-                    bool b = Convert.ToBoolean(ReadByte());
-                    SetToken(JsonToken.Boolean, b);
-                    break;
-                case BsonType.Date:
-                    long ticks = ReadInt64();
-                    DateTime utcDateTime = DateTimeUtils.ConvertJavaScriptTicksToDateTime(ticks);
-
-                    DateTime dateTime;
-                    switch (DateTimeKindHandling)
-                    {
-                        case DateTimeKind.Unspecified:
-                            dateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Unspecified);
-                            break;
-                        case DateTimeKind.Local:
-                            dateTime = utcDateTime.ToLocalTime();
-                            break;
-                        default:
-                            dateTime = utcDateTime;
-                            break;
-                    }
-
-                    SetToken(JsonToken.Date, dateTime);
-                    break;
-                case BsonType.Null:
-                    SetToken(JsonToken.Null);
-                    break;
-                case BsonType.Regex:
-                    string expression = ReadString();
-                    string modifiers = ReadString();
-
-                    string regex = @"/" + expression + @"/" + modifiers;
-                    SetToken(JsonToken.String, regex);
-                    break;
-                case BsonType.Reference:
-                    SetToken(JsonToken.StartObject);
-                    _bsonReaderState = BsonReaderState.ReferenceStart;
-                    break;
-                case BsonType.Code:
-                    SetToken(JsonToken.String, ReadLengthString());
-                    break;
-                case BsonType.CodeWScope:
-                    SetToken(JsonToken.StartObject);
-                    _bsonReaderState = BsonReaderState.CodeWScopeStart;
-                    break;
-                case BsonType.Integer:
-                    SetToken(JsonToken.Integer, (long)ReadInt32());
-                    break;
-                case BsonType.TimeStamp:
-                case BsonType.Long:
-                    SetToken(JsonToken.Integer, ReadInt64());
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), "Unexpected BsonType value: " + type);
-            }
-        }
-
-        private byte[] ReadBinary(out BsonBinaryType binaryType)
-        {
-            int dataLength = ReadInt32();
-
-            binaryType = (BsonBinaryType)ReadByte();
-
-#pragma warning disable 612,618
-            // the old binary type has the data length repeated in the data for some reason
-            if (binaryType == BsonBinaryType.BinaryOld && !_jsonNet35BinaryCompatibility)
-            {
-                dataLength = ReadInt32();
-            }
-#pragma warning restore 612,618
-
-            return ReadBytes(dataLength);
-        }
-
-        private string ReadString()
-        {
-            EnsureBuffers();
-
-            StringBuilder builder = null;
-
-            int totalBytesRead = 0;
-            // used in case of left over multibyte characters in the buffer
-            int offset = 0;
             while (true)
             {
-                int count = offset;
-                byte b;
-                while (count < MaxCharBytesSize && (b = _reader.ReadByte()) > 0)
+                if (_currentContext != null)
                 {
-                    _byteBuffer[count++] = b;
-                }
-                int byteCount = count - offset;
-                totalBytesRead += byteCount;
-
-                if (count < MaxCharBytesSize && builder == null)
-                {
-                    // pref optimization to avoid reading into a string builder
-                    // if string is smaller than the buffer then return it directly
-                    int length = Encoding.UTF8.GetChars(_byteBuffer, 0, byteCount, _charBuffer, 0);
-
-                    MovePosition(totalBytesRead + 1);
-                    return new string(_charBuffer, 0, length);
-                }
-                else
-                {
-                    // calculate the index of the end of the last full character in the buffer
-                    int lastFullCharStop = GetLastFullCharStop(count - 1);
-
-                    int charCount = Encoding.UTF8.GetChars(_byteBuffer, 0, lastFullCharStop + 1, _charBuffer, 0);
-
-                    if (builder == null)
+                    if (_currentContext.Length > 0)
+                        _currentContext.Length--;
+                    else if (_currentContext.Length == 0)
                     {
-                        builder = new StringBuilder(MaxCharBytesSize * 2);
+                        if (_currentContext.MajorType == CborMajorType.Array)
+                            SetToken(JsonToken.EndArray);
+                        else if (_currentContext.MajorType == CborMajorType.Map)
+                            SetToken(JsonToken.EndObject);
+                        else
+                            throw new InvalidOperationException($"Should not have reached end of collection for MajorType {_currentContext.MajorType}");
+                        PopContext();
+                        return true;
                     }
+                }
 
-                    builder.Append(_charBuffer, 0, charCount);
+                var initialByte = ReadInitialByte();
+                var majorType = initialByte.Item1;
+                var simpleType = initialByte.Item2;
 
-                    if (lastFullCharStop < byteCount - 1)
-                    {
-                        offset = byteCount - lastFullCharStop - 1;
-                        // copy left over multi byte characters to beginning of buffer for next iteration
-                        Array.Copy(_byteBuffer, lastFullCharStop + 1, _byteBuffer, 0, offset);
-                    }
-                    else
-                    {
-                        // reached end of string
-                        if (count < MaxCharBytesSize)
+                if (_currentContext != null && 
+                    (_currentContext.MajorType == CborMajorType.ByteString || _currentContext.MajorType == CborMajorType.TextString) && 
+                    _currentContext.MajorType != majorType && !(majorType == CborMajorType.Primitive && simpleType == CborSimpleType.Break))
+                    throw new InvalidDataException("Indefinite byte/text string has incorrect nested major type");
+
+                if (majorType == CborMajorType.Tagged)
+                {
+                    // Todo: Support Optional Tags
+                    var tag = ReadUInt64(simpleType); 
+
+                    initialByte = ReadInitialByte();
+                    majorType = initialByte.Item1;
+                    simpleType = initialByte.Item2;
+                }
+
+                switch (majorType)
+                {
+                    case CborMajorType.UnsignedInteger:
+                        var un = ReadUInt64(simpleType);
+                        if (un <= int.MaxValue)
+                            SetToken(JsonToken.Integer, Convert.ToInt32(un));
+                        else if (un <= long.MaxValue)
+                            SetToken(JsonToken.Integer, Convert.ToInt64(un));
+                        else
+                            SetToken(JsonToken.Integer, un);
+                        return true;
+                    case CborMajorType.NegativeInteger:
+                        var sn = -1 - Convert.ToInt64(ReadUInt64(simpleType));
+                        if (sn >= int.MinValue)
+                            SetToken(JsonToken.Integer, Convert.ToInt32(sn));
+                        else if (sn >= long.MinValue)
+                            SetToken(JsonToken.Integer, sn);
+                        else
+                            throw new IndexOutOfRangeException();
+                        return true;
+                    case CborMajorType.Primitive:
+                        if (simpleType == CborSimpleType.False)
                         {
-                            MovePosition(totalBytesRead + 1);
-                            return builder.ToString();
+                            SetToken(JsonToken.Boolean, false);
+                            return true;
+                        }
+                        else if (simpleType == CborSimpleType.True)
+                        {
+                            SetToken(JsonToken.Boolean, true);
+                            return true;
+                        }
+                        else if (simpleType == CborSimpleType.Null)
+                        {
+                            SetToken(JsonToken.Null);
+                            return true;
+                        }
+                        else if (simpleType == CborSimpleType.Undefined)
+                        {
+                            SetToken(JsonToken.Undefined);
+                            return true;
+                        }
+                        else if (simpleType == CborSimpleType.HalfFloat)
+                        {
+                            // Suddenly Half-Floats! Thanks to Appendix D. of RFC 7049
+                            var half = _reader.ReadUInt16BE();
+
+                            var exp = (half >> 10) & 0x1F;
+                            var mant = half & 0x3FF;
+                            double val;
+                            if (exp == 0) val = mant * Math.Pow(2, -24);
+                            else if (exp != 31) val = (mant + 1024) * Math.Pow(2, exp - 25);
+                            else val = mant == 0 ? double.PositiveInfinity : double.NaN;
+
+                            SetToken(JsonToken.Float, ((half & 0x8000) > 0) ? -val : val);
+                            return true;
+                        }
+                        if (simpleType == CborSimpleType.SingleFloat)
+                        {
+                            SetToken(JsonToken.Float, BitConverter.ToSingle(_reader.ReadBytesBE(4), 0));
+                            return true;
+                        }
+                        else if (simpleType == CborSimpleType.DoubleFloat)
+                        {
+                            SetToken(JsonToken.Float, BitConverter.ToDouble(_reader.ReadBytesBE(8), 0));
+                            return true;
+                        }
+                        else if (simpleType == CborSimpleType.Break)
+                        {
+                            if ((_currentContext?.Length ?? 0) == -1)
+                            {
+                                if (_currentContext.MajorType == CborMajorType.Array)
+                                {
+                                    SetToken(JsonToken.EndArray);
+                                    PopContext();
+                                    return true;
+                                }
+                                else if (_currentContext.MajorType == CborMajorType.Map)
+                                {
+                                    SetToken(JsonToken.EndObject);
+                                    PopContext();
+                                    return true;
+                                }
+                                else if (_currentContext.MajorType == CborMajorType.ByteString || _currentContext.MajorType == CborMajorType.TextString)
+                                {
+                                    PopContext();
+                                }
+                                else
+                                    throw new InvalidDataException();
+
+                            }
+                            else
+                                throw new InvalidDataException("Cannot break non indefinite collection");
+                        }
+                        //else
+                        //throw new InvalidDataException();
+                        break;
+                    case CborMajorType.ByteString:
+                        if (simpleType != CborSimpleType.Break)
+                        {
+                            SetToken(JsonToken.Bytes, _reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType))));
+                            return true;
                         }
 
-                        offset = 0;
-                    }
+                        if (_currentContext != null && _currentContext.MajorType == CborMajorType.ByteString && _currentContext.Length == -1)
+                            throw new InvalidDataException("Nested indefinite byte-string is not permitted");
+                        PushContext(new ContainerContext(CborMajorType.ByteString)
+                        {
+                            Length = -1
+                        });
+                        break;
+                    case CborMajorType.TextString:
+                        if (simpleType != CborSimpleType.Break)
+                        {
+                            SetToken(JsonToken.String, Encoding.UTF8.GetString(_reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType)))));
+                            return true;
+                        }
+
+                        if (_currentContext != null && _currentContext.MajorType == CborMajorType.TextString && _currentContext.Length == -1)
+                            throw new InvalidDataException("Nested indefinite text-string is not permitted");
+                        PushContext(new ContainerContext(CborMajorType.TextString)
+                        {
+                            Length = -1
+                        });
+                        break;
+                    case CborMajorType.Array:
+                        PushContext(new ContainerContext(CborMajorType.Array)
+                        {
+                            Length = simpleType == CborSimpleType.Break ? -1 : Convert.ToInt32(ReadUInt32(simpleType))
+                        });
+                        SetToken(JsonToken.StartArray);
+                        return true;
+                    case CborMajorType.Map:
+                        PushContext(new ContainerContext(CborMajorType.Map)
+                        {
+                            Length = simpleType == CborSimpleType.Break ? -1 : (Convert.ToInt32(ReadUInt32(simpleType)) * 2)
+                        });
+                        SetToken(JsonToken.StartObject);
+                        return true;
+                    default:
+                        throw new InvalidOperationException();
                 }
             }
         }
 
-        private string ReadLengthString()
+        private bool ParsePropertyName()
         {
-            int length = ReadInt32();
+            if (_currentContext == null)
+                throw new InvalidOperationException("Cannot parse property name without context");
+            if(_currentContext.MajorType != CborMajorType.Map)
+                throw new InvalidOperationException("Cannot parse property name with invalid context");
 
-            MovePosition(length);
+            if (_currentContext.Length > 0)
+                _currentContext.Length--;
+            else if (_currentContext.Length == 0) { 
+                SetToken(JsonToken.EndObject);
+                PopContext();
+                return true;
+            }
 
-            string s = GetString(length - 1);
-            _reader.ReadByte();
+            var initialByte = ReadInitialByte();
+            var majorType = initialByte.Item1;
+            var simpleType = initialByte.Item2;
 
-            return s;
+            if (majorType == CborMajorType.Tagged)
+            {
+                // State.Tag = (int)Value;
+                // Todo: Support Optional Tags
+
+                initialByte = ReadInitialByte();
+                majorType = initialByte.Item1;
+                simpleType = initialByte.Item2;
+            }
+            if (majorType != CborMajorType.TextString)
+                throw new InvalidDataException($"Expecting string, got {majorType} instead");
+
+            if (simpleType == CborSimpleType.Break)
+                throw new InvalidDataException($"Indefinite strings are not supported for property names");
+
+            SetToken(JsonToken.PropertyName, Encoding.UTF8.GetString(_reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType)))));
+            return true;
         }
 
-        private string GetString(int length)
+        private Tuple<CborMajorType, CborSimpleType> ReadInitialByte()
         {
-            if (length == 0)
-            {
-                return string.Empty;
-            }
-
-            EnsureBuffers();
-
-            StringBuilder builder = null;
-
-            int totalBytesRead = 0;
-
-            // used in case of left over multibyte characters in the buffer
-            int offset = 0;
-            do
-            {
-                int count = ((length - totalBytesRead) > MaxCharBytesSize - offset)
-                    ? MaxCharBytesSize - offset
-                    : length - totalBytesRead;
-
-                int byteCount = _reader.Read(_byteBuffer, offset, count);
-
-                if (byteCount == 0)
-                {
-                    throw new EndOfStreamException("Unable to read beyond the end of the stream.");
-                }
-
-                totalBytesRead += byteCount;
-
-                // Above, byteCount is how many bytes we read this time.
-                // Below, byteCount is how many bytes are in the _byteBuffer.
-                byteCount += offset;
-
-                if (byteCount == length)
-                {
-                    // pref optimization to avoid reading into a string builder
-                    // first iteration and all bytes read then return string directly
-                    int charCount = Encoding.UTF8.GetChars(_byteBuffer, 0, byteCount, _charBuffer, 0);
-                    return new string(_charBuffer, 0, charCount);
-                }
-                else
-                {
-                    int lastFullCharStop = GetLastFullCharStop(byteCount - 1);
-
-                    if (builder == null)
-                    {
-                        builder = new StringBuilder(length);
-                    }
-
-                    int charCount = Encoding.UTF8.GetChars(_byteBuffer, 0, lastFullCharStop + 1, _charBuffer, 0);
-                    builder.Append(_charBuffer, 0, charCount);
-
-                    if (lastFullCharStop < byteCount - 1)
-                    {
-                        offset = byteCount - lastFullCharStop - 1;
-                        // copy left over multi byte characters to beginning of buffer for next iteration
-                        Array.Copy(_byteBuffer, lastFullCharStop + 1, _byteBuffer, 0, offset);
-                    }
-                    else
-                    {
-                        offset = 0;
-                    }
-                }
-            } while (totalBytesRead < length);
-
-            return builder.ToString();
-        }
-
-        private int GetLastFullCharStop(int start)
-        {
-            int lookbackPos = start;
-            int bis = 0;
-            while (lookbackPos >= 0)
-            {
-                bis = BytesInSequence(_byteBuffer[lookbackPos]);
-                if (bis == 0)
-                {
-                    lookbackPos--;
-                    continue;
-                }
-                else if (bis == 1)
-                {
-                    break;
-                }
-                else
-                {
-                    lookbackPos--;
-                    break;
-                }
-            }
-            if (bis == start - lookbackPos)
-            {
-                //Full character.
-                return start;
-            }
-            else
-            {
-                return lookbackPos;
-            }
-        }
-
-        private int BytesInSequence(byte b)
-        {
-            if (b <= SeqRange1[1])
-            {
-                return 1;
-            }
-            if (b >= SeqRange2[0] && b <= SeqRange2[1])
-            {
-                return 2;
-            }
-            if (b >= SeqRange3[0] && b <= SeqRange3[1])
-            {
-                return 3;
-            }
-            if (b >= SeqRange4[0] && b <= SeqRange4[1])
-            {
-                return 4;
-            }
-            return 0;
-        }
-
-        private void EnsureBuffers()
-        {
-            if (_byteBuffer == null)
-            {
-                _byteBuffer = new byte[MaxCharBytesSize];
-            }
-            if (_charBuffer == null)
-            {
-                int charBufferSize = Encoding.UTF8.GetMaxCharCount(MaxCharBytesSize);
-                _charBuffer = new char[charBufferSize];
-            }
-        }
-
-        private double ReadDouble()
-        {
-            MovePosition(8);
-            return _reader.ReadDouble();
-        }
-
-        private int ReadInt32()
-        {
-            MovePosition(4);
-            return _reader.ReadInt32();
-        }
-
-        private long ReadInt64()
-        {
-            MovePosition(8);
-            return _reader.ReadInt64();
-        }
-
-        private BsonType ReadType()
-        {
-            MovePosition(1);
-            return (BsonType)_reader.ReadSByte();
-        }
-
-        private void MovePosition(int count)
-        {
-            _currentContext.Position += count;
+            var b = _reader.ReadByte();
+            return Tuple.Create((CborMajorType)(b & 0xE0), (CborSimpleType)(b & 0x1F));
         }
 
         private byte[] ReadBytes(int count)
         {
-            MovePosition(count);
             return _reader.ReadBytes(count);
+        }
+
+        private uint ReadUInt32(CborSimpleType simpleType)
+        {
+            if ((byte)simpleType < 24)
+                return Convert.ToUInt32((byte) simpleType);
+
+            switch ((byte)simpleType)
+            {
+                case 24:
+                    return Convert.ToUInt32(_reader.ReadByte()); 
+                case 25:
+                    return Convert.ToUInt32(_reader.ReadUInt16BE());
+                case 26:
+                    return _reader.ReadUInt32BE();
+                case 27:
+                    return Convert.ToUInt32(_reader.ReadUInt64BE());
+                case 28: case 29: case 30:
+                    throw new InvalidDataException(); // unassigned
+                default:
+                    throw new InvalidOperationException($"Invalid simple type ({(int)simpleType}) passed to {nameof(ReadUInt32)}");
+            }
+        }
+
+        private ulong ReadUInt64(CborSimpleType simpleType)
+        {
+            if ((byte)simpleType < 24)
+                return Convert.ToUInt64((byte)simpleType);
+
+            switch ((byte)simpleType)
+            {
+                case 24:
+                    return Convert.ToUInt64(_reader.ReadByte());
+                case 25:
+                    return Convert.ToUInt64(_reader.ReadUInt16BE());
+                case 26:
+                    return Convert.ToUInt64(_reader.ReadUInt32BE());
+                case 27:
+                    return _reader.ReadUInt64BE();
+                case 28: case 29: case 30:
+                    throw new InvalidDataException(); // unassigned
+                default:
+                    throw new InvalidOperationException($"Invalid simple type ({(int)simpleType}) passed to {nameof(ReadUInt64)}");
+            }
         }
     }
 }
