@@ -44,7 +44,7 @@ using Newtonsoft.Json.Linq;
 namespace Newtonsoft.Json.Cbor.Tests
 {
     [TestFixture]
-    public class BsonDataReaderAsyncTests : TestFixtureBase
+    public class CborDataReaderAsyncTests : TestFixtureBase
     {
         private const char Euro = '\u20ac';
 

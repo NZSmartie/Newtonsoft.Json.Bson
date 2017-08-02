@@ -54,7 +54,7 @@ using System.Linq;
 namespace Newtonsoft.Json.Cbor.Tests
 {
     [TestFixture]
-    public class BsonDataWriterTests : TestFixtureBase
+    public class CborDataWriterTests : TestFixtureBase
     {
         [Test]
         public void CloseOutput()

@@ -45,7 +45,7 @@ using System.Globalization;
 namespace Newtonsoft.Json.Cbor.Tests
 {
     [TestFixture]
-    public class BsonDataWriterAsyncTests : TestFixtureBase
+    public class CborDataWriterAsyncTests : TestFixtureBase
     {
         [Test]
         public async Task CloseOutputAsync()
