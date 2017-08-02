@@ -27,9 +27,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Bson.Utilities;
+using Newtonsoft.Json.Cbor.Utilities;
 
-namespace Newtonsoft.Json.Bson
+namespace Newtonsoft.Json.Cbor
 {
     public partial class BsonDataWriter
     {

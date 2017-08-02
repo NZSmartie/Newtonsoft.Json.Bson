@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Newtonsoft.Json.Bson.Utilities
+namespace Newtonsoft.Json.Cbor.Utilities
 {
     internal static class ConvertUtils
     {

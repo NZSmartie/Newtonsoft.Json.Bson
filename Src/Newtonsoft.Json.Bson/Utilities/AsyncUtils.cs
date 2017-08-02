@@ -30,7 +30,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Newtonsoft.Json.Bson.Utilities
+namespace Newtonsoft.Json.Cbor.Utilities
 {
     internal static class AsyncUtils
     {

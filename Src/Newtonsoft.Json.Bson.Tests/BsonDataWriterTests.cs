@@ -33,11 +33,11 @@ using System.Text.RegularExpressions;
 #if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
-using Assert = Newtonsoft.Json.Bson.Tests.XUnitAssert;
+using Assert = Newtonsoft.Json.Cbor.Tests.XUnitAssert;
 #else
 using NUnit.Framework;
 #endif
-using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Cbor;
 using System.IO;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Utilities;
@@ -48,11 +48,10 @@ using Newtonsoft.Json.Tests.TestObjects.GeoCoding;
 using Newtonsoft.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
-using Newtonsoft.Json.Bson.Converters;
 
 #endif
 
-namespace Newtonsoft.Json.Bson.Tests
+namespace Newtonsoft.Json.Cbor.Tests
 {
     [TestFixture]
     public class BsonDataWriterTests : TestFixtureBase

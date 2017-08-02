@@ -20,13 +20,17 @@
     <PackageLicenseUrl>https://raw.github.com/JamesNK/Newtonsoft.Json.Bson/master/LICENSE.md</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/JamesNK/Newtonsoft.Json.Bson</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyName>Newtonsoft.Json.Bson</AssemblyName>
+    <AssemblyName>Newtonsoft.Json.Cbor</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath="LICENSE.md" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="System.ValueTuple" Version="4.3.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Converters\" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
     <AssemblyTitle>Json.NET BSON</AssemblyTitle>

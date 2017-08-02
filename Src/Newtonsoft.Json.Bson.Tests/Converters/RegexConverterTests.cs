@@ -27,20 +27,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Cbor;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json.Utilities;
 #if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
-using Assert = Newtonsoft.Json.Bson.Tests.XUnitAssert;
+using Assert = Newtonsoft.Json.Cbor.Tests.XUnitAssert;
 #else
 using NUnit.Framework;
 #endif
 using Newtonsoft.Json.Tests.TestObjects;
 
-namespace Newtonsoft.Json.Bson.Tests.Converters
+namespace Newtonsoft.Json.Cbor.Tests.Converters
 {
     [TestFixture]
     public class RegexConverterTests : TestFixtureBase

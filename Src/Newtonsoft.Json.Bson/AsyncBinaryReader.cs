@@ -31,7 +31,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Newtonsoft.Json.Bson
+namespace Newtonsoft.Json.Cbor
 {
     internal class AsyncBinaryReader : BinaryReader
     {

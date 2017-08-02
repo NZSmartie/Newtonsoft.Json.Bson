@@ -31,7 +31,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Newtonsoft.Json.Bson
+namespace Newtonsoft.Json.Cbor
 {
     // This is not a intended as a general-purpose binary writer, caution should be exercised
     // if adapting for other uses.

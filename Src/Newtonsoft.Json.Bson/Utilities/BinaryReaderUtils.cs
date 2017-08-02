@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Newtonsoft.Json.Bson.Utilities
+namespace Newtonsoft.Json.Cbor.Utilities
 {
     internal static class BinaryReaderUtils
     {

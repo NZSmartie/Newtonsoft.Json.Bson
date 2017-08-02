@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B520C700-7D45-4D82-BFB5-218FA68CF5CF}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Newtonsoft.Json.Bson", "Newtonsoft.Json.Bson\Newtonsoft.Json.Bson.csproj", "{A97A4CB3-51AD-4605-BA9F-D6861E582C85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Newtonsoft.Json.Cbor", "Newtonsoft.Json.Bson\Newtonsoft.Json.Cbor.csproj", "{A97A4CB3-51AD-4605-BA9F-D6861E582C85}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Newtonsoft.Json.Bson.Tests", "Newtonsoft.Json.Bson.Tests\Newtonsoft.Json.Bson.Tests.csproj", "{141A67F2-6471-436F-A35E-BF6242B693B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Newtonsoft.Json.Cbor.Tests", "Newtonsoft.Json.Bson.Tests\Newtonsoft.Json.Cbor.Tests.csproj", "{141A67F2-6471-436F-A35E-BF6242B693B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

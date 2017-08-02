@@ -38,7 +38,7 @@ using System.Text;
 using System.Threading;
 #if DNXCORE50
 using Xunit;
-using Assert = Newtonsoft.Json.Bson.Tests.XUnitAssert;
+using Assert = Newtonsoft.Json.Cbor.Tests.XUnitAssert;
 using XAssert = Xunit.Assert;
 #else
 using NUnit.Framework;
@@ -46,7 +46,7 @@ using NUnit.Framework;
 using System.Collections;
 #if !(NET20 || NET35 || NET40 || PORTABLE40)
 using System.Threading.Tasks;
-using Newtonsoft.Json.Bson.Utilities;
+using Newtonsoft.Json.Cbor.Utilities;
 #endif
 #if NET20
 using Newtonsoft.Json.Utilities.LinqBridge;
@@ -56,7 +56,7 @@ using System.Linq;
 
 #endif
 
-namespace Newtonsoft.Json.Bson.Tests
+namespace Newtonsoft.Json.Cbor.Tests
 {
     public class TestReflectionUtils
     {

@@ -33,15 +33,15 @@ using System.Text;
 #if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
-using Assert = Newtonsoft.Json.Bson.Tests.XUnitAssert;
+using Assert = Newtonsoft.Json.Cbor.Tests.XUnitAssert;
 #else
 using NUnit.Framework;
 #endif
-using Newtonsoft.Json.Bson;
+using Newtonsoft.Json.Cbor;
 using System.IO;
 using Newtonsoft.Json.Linq;
 
-namespace Newtonsoft.Json.Bson.Tests
+namespace Newtonsoft.Json.Cbor.Tests
 {
     [TestFixture]
     public class BsonDataReaderAsyncTests : TestFixtureBase

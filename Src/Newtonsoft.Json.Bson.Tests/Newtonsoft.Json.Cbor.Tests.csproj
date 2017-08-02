@@ -8,7 +8,7 @@
     <Product>Json.NET BSON</Product>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Copyright>Copyright © James Newton-King 2017</Copyright>
-    <AssemblyName>Newtonsoft.Json.Bson.Tests</AssemblyName>
+    <AssemblyName>Newtonsoft.Json.Cbor.Tests</AssemblyName>
     <!-- Workaround for https://github.com/nunit/nunit3-vs-adapter/issues/296 -->
     <DebugType Condition="'$(TargetFramework)' != '' AND '$(TargetFramework)' != 'netcoreapp1.1'">Full</DebugType>
   </PropertyGroup>
@@ -16,7 +16,6 @@
     <None Include="SpaceShipV2.bson">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <ProjectReference Include="..\Newtonsoft.Json.Bson\Newtonsoft.Json.Bson.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='net45'">
     <PackageReference Include="NUnit" Version="3.6.0" />
@@ -29,6 +28,9 @@
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Newtonsoft.Json.Bson\Newtonsoft.Json.Cbor.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- Tracking for removal https://github.com/Microsoft/vstest/issues/472 -->
