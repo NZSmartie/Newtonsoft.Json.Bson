@@ -30,7 +30,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Newtonsoft.Json.Bson\Newtonsoft.Json.Cbor.csproj" />
+    <ProjectReference Include="..\Newtonsoft.Json.Cbor\Newtonsoft.Json.Cbor.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- Tracking for removal https://github.com/Microsoft/vstest/issues/472 -->
