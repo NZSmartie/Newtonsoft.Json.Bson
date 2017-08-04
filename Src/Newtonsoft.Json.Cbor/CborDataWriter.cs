@@ -436,9 +436,11 @@ namespace Newtonsoft.Json.Cbor
 #endregion
 
         
-        public void WriteRegex(string toString, string options)
+        public void WriteTag(int tag)
         {
-            throw new NotImplementedException();
+            if (tag < 0)
+                throw ExceptionUtils.CreateJsonWriterException(this, "Can not write a negative tag value", null);
+            EnqueueValue(CborMajorType.Tagged, (ulong)tag, false);
         }
 
         private void EnqueueValue(long value)
@@ -454,7 +456,7 @@ namespace Newtonsoft.Json.Cbor
             EnqueueValue(CborMajorType.UnsignedInteger, value);
         }
 
-        private void EnqueueValue(CborMajorType majorType, ulong value)
+        private void EnqueueValue(CborMajorType majorType, ulong value, bool count = true)
         {
             if (value < 24)
             {
@@ -474,7 +476,8 @@ namespace Newtonsoft.Json.Cbor
 
                 _values.Enqueue(new CborTokenValue(majorType, bytes));
             }
-            CountItem();
+            if(count)
+                CountItem();
         }
 
         private void CountItem()

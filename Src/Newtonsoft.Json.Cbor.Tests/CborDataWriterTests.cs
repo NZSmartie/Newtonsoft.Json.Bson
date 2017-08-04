@@ -490,25 +490,6 @@ namespace Newtonsoft.Json.Cbor.Tests
         }
 
         [Test]
-        public void WriteRegexPlusContent()
-        {
-            throw new NotImplementedException();
-            //MemoryStream ms = new MemoryStream();
-            //CborDataWriter writer = new CborDataWriter(ms);
-
-            //writer.WriteStartObject();
-            //writer.WritePropertyName("regex");
-            //writer.WriteRegex("abc", "i");
-            //writer.WritePropertyName("test");
-            //writer.WriteRegex(string.Empty, null);
-            //writer.WriteEndObject();
-
-            //byte[] expected = HexToBytes("1A-00-00-00-0B-72-65-67-65-78-00-61-62-63-00-69-00-0B-74-65-73-74-00-00-00-00");
-
-            //CollectionAssert.AreEquivalent(expected, ms.ToArray());
-        }
-
-        [Test]
         public void SerializeEmptyAndNullStrings()
         {
             Product p = new Product();
@@ -649,7 +630,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 //            {
 //                Converters =
 //                {
-//                    new BsonDataRegexConverter()
+//                    new CborDataRegexConverter()
 //                }
 //            };
 
