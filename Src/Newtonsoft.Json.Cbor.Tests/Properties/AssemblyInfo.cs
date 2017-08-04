@@ -31,10 +31,6 @@ using System.Security;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-#if DNXCORE50
-[assembly: Xunit.CollectionBehavior(DisableTestParallelization = true)]
-#endif
-
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

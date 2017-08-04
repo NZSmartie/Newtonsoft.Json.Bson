@@ -36,13 +36,7 @@ using System.Runtime.Serialization.Json;
 #endif
 using System.Text;
 using System.Threading;
-#if DNXCORE50
-using Xunit;
-using Assert = Newtonsoft.Json.Cbor.Tests.XUnitAssert;
-using XAssert = Xunit.Assert;
-#else
 using NUnit.Framework;
-#endif
 using System.Collections;
 #if !(NET20 || NET35 || NET40 || PORTABLE40)
 using System.Threading.Tasks;
@@ -62,138 +56,24 @@ namespace Newtonsoft.Json.Cbor.Tests
     {
         public static IEnumerable<ConstructorInfo> GetConstructors(Type type)
         {
-#if !(DNXCORE50)
             return type.GetConstructors();
-#else
-            return type.GetTypeInfo().DeclaredConstructors;
-#endif
         }
 
         public static PropertyInfo GetProperty(Type type, string name)
         {
-#if !(DNXCORE50)
             return type.GetProperty(name);
-#else
-            return type.GetTypeInfo().GetDeclaredProperty(name);
-#endif
         }
 
         public static FieldInfo GetField(Type type, string name)
         {
-#if !(DNXCORE50)
             return type.GetField(name);
-#else
-            return type.GetTypeInfo().GetDeclaredField(name);
-#endif
         }
 
         public static MethodInfo GetMethod(Type type, string name)
         {
-#if !(DNXCORE50)
             return type.GetMethod(name);
-#else
-            return type.GetTypeInfo().GetDeclaredMethod(name);
-#endif
         }
     }
-
-#if DNXCORE50
-    public class TestFixtureAttribute : Attribute
-    {
-        // xunit doesn't need a test fixture attribute
-        // this exists so the project compiles
-    }
-
-    public class XUnitAssert
-    {
-        public static void IsInstanceOf(Type expectedType, object o)
-        {
-            XAssert.IsType(expectedType, o);
-        }
-
-        public static void AreEqual(double expected, double actual, double r)
-        {
-            XAssert.Equal(expected, actual, 5); // hack
-        }
-
-        public static void AreEqual(object expected, object actual, string message = null)
-        {
-            XAssert.Equal(expected, actual);
-        }
-
-        public static void AreEqual<T>(T expected, T actual, string message = null)
-        {
-            XAssert.Equal(expected, actual);
-        }
-
-        public static void AreNotEqual(object expected, object actual, string message = null)
-        {
-            XAssert.NotEqual(expected, actual);
-        }
-
-        public static void AreNotEqual<T>(T expected, T actual, string message = null)
-        {
-            XAssert.NotEqual(expected, actual);
-        }
-
-        public static void Fail(string message = null, params object[] args)
-        {
-            if (message != null)
-            {
-                message = message.FormatWith(CultureInfo.InvariantCulture, args);
-            }
-
-            XAssert.True(false, message);
-        }
-
-        public static void Pass()
-        {
-        }
-
-        public static void IsTrue(bool condition, string message = null)
-        {
-            XAssert.True(condition);
-        }
-
-        public static void IsFalse(bool condition)
-        {
-            XAssert.False(condition);
-        }
-
-        public static void IsNull(object o)
-        {
-            XAssert.Null(o);
-        }
-
-        public static void IsNotNull(object o)
-        {
-            XAssert.NotNull(o);
-        }
-
-        public static void AreNotSame(object expected, object actual)
-        {
-            XAssert.NotSame(expected, actual);
-        }
-
-        public static void AreSame(object expected, object actual)
-        {
-            XAssert.Same(expected, actual);
-        }
-    }
-
-    public class CollectionAssert
-    {
-        public static void AreEquivalent<T>(IEnumerable<T> expected, IEnumerable<T> actual)
-        {
-            XAssert.Equal(expected, actual);
-        }
-
-        public static void AreEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual)
-        {
-            XAssert.Equal(expected, actual);
-        }
-    }
-#endif
 
     [TestFixture]
     public abstract class TestFixtureBase
@@ -212,11 +92,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
         public static string ResolvePath(string path)
         {
-#if !DNXCORE50
-            return Path.Combine(TestContext.CurrentContext.TestDirectory, path);
-#else
             return path;
-#endif
         }
 
         protected string BytesToHex(byte[] bytes)
@@ -269,22 +145,17 @@ namespace Newtonsoft.Json.Cbor.Tests
             return bytes;
         }
 
-#if DNXCORE50
-        protected TestFixtureBase()
-#else
         [SetUp]
         protected void TestSetup()
-#endif
         {
 #if !(DNXCORE50)
             //CultureInfo turkey = CultureInfo.CreateSpecificCulture("tr");
             //Thread.CurrentThread.CurrentCulture = turkey;
             //Thread.CurrentThread.CurrentUICulture = turkey;
-
+      
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 #endif
-
             JsonConvert.DefaultSettings = null;
         }
 
@@ -313,14 +184,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
         public static void Contains(IList collection, object value, string message)
         {
-#if !(DNXCORE50)
             Assert.Contains(value, collection, message);
-#else
-            if (!collection.Cast<object>().Any(i => i.Equals(value)))
-            {
-                throw new Exception(message ?? "Value not found in collection.");
-            }
-#endif
         }
     }
 

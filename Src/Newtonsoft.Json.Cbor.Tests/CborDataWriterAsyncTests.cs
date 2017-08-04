@@ -31,13 +31,7 @@ using System.Numerics;
 #endif
 using System.Text;
 using System.Threading.Tasks;
-#if DNXCORE50
-using Xunit;
-using Test = Xunit.FactAttribute;
-using Assert = Newtonsoft.Json.Cbor.Tests.XUnitAssert;
-#else
 using NUnit.Framework;
-#endif
 using Newtonsoft.Json.Cbor;
 using System.IO;
 using System.Globalization;

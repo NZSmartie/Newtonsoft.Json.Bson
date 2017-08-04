@@ -30,13 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Text;
-#if DNXCORE50
-using Xunit;
-using Test = Xunit.FactAttribute;
-using Assert = Newtonsoft.Json.Cbor.Tests.XUnitAssert;
-#else
 using NUnit.Framework;
-#endif
 using Newtonsoft.Json.Cbor;
 using System.IO;
 using Newtonsoft.Json.Linq;
