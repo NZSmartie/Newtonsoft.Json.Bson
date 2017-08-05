@@ -44,10 +44,12 @@ namespace Newtonsoft.Json.Cbor
     public partial class CborDataWriter : JsonWriter
     {
         public DateTimeKind DateTimeKindHandling { get; set; }
+
+        public DateTimeEncoding DateTimeEncoding { get; set; }
         
         public CborWriterCollectionBehaviour CollectionBehaviour { get; set; }
         
-        private BinaryWriter _writer;
+        private readonly BinaryWriter _writer;
 
         private readonly Stack<CborCollectionToken> _collectionStack = new Stack<CborCollectionToken>();
 
@@ -369,30 +371,67 @@ namespace Newtonsoft.Json.Cbor
         /// <inheritdoc />
         public override void WriteValue(DateTime value)
         {
-            throw  new NotImplementedException();
             base.WriteValue(value);
+            WriteDateTime(value);
         }
 
         /// <inheritdoc />
         public override void WriteValue(DateTimeOffset value)
         {
-            throw  new NotImplementedException();
-
             base.WriteValue(value);
+            switch (DateTimeKindHandling)
+            {
+                case DateTimeKind.Local:
+                    WriteDateTime(value.LocalDateTime);
+                    break;
+                case DateTimeKind.Utc:
+                    WriteDateTime(value.UtcDateTime);
+                    break;
+                case DateTimeKind.Unspecified:
+                    WriteDateTime(value.DateTime);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(DateTimeKindHandling));
+            }
         }
 
-        /// <inheritdoc />
-        public override void WriteValue(Guid value)
+        private void WriteDateTime(DateTime dateTime)
         {
-            throw new NotImplementedException();
-            base.WriteValue(value);
+            switch (DateTimeEncoding)
+            {
+                case DateTimeEncoding.String:
+                    WriteTag(0);
+                    _values.Enqueue(new CborTokenValue(CborMajorType.TextString,
+                        Encoding.UTF8.GetBytes(dateTime.ToString("u"))));
+                    CountItem();
+                    break;
+                case DateTimeEncoding.Epoch:
+                    WriteTag(1);
+                    EnqueueValue(Convert.ToUInt64(dateTime.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKindHandling))
+                        .TotalSeconds));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(DateTimeEncoding));
+            }
         }
 
         /// <inheritdoc />
         public override void WriteValue(TimeSpan value)
         {
-            throw new NotImplementedException();
             base.WriteValue(value);
+            _values.Enqueue(new CborTokenValue(CborMajorType.TextString,
+                Encoding.UTF8.GetBytes(value.ToString())));
+            CountItem();
+        }
+
+        /// <inheritdoc />
+        public override void WriteValue(Guid value)
+        {
+            base.WriteValue(value);
+            WriteTag(37);
+            _values.Enqueue(new CborTokenValue(CborMajorType.ByteString,
+                value.ToByteArray()));
+            CountItem();
         }
 
         /// <inheritdoc />
@@ -525,5 +564,11 @@ namespace Newtonsoft.Json.Cbor
             else
                 _writer.Write(bytes);
         }
+    }
+
+    public enum DateTimeEncoding
+    {
+        String,
+        Epoch
     }
 }
