@@ -140,7 +140,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             writer.WriteEnd();
 
             string bson = BytesToHex(ms.ToArray());
-            Assert.AreEqual("1D-00-00-00-05-30-00-10-00-00-00-04-D7-EE-21-D8-5C-4B-C9-43-8A-C2-69-28-E5-79-B7-05-00", bson);
+            Assert.AreEqual("81-D8-25-50-D7-EE-21-D8-5C-4B-C9-43-8A-C2-69-28-E5-79-B7-05", bson);
         }
 
         [Test]
@@ -181,7 +181,7 @@ namespace Newtonsoft.Json.Cbor.Tests
 
             ms.Seek(0, SeekOrigin.Begin);
 
-            string expected = "83-61-61-61-62-6C-48-65-6C-4C-6F-20-77-6F-72-6C-64-21";
+            string expected = "83-61-61-61-62-4C-48-65-6C-6C-6F-20-77-6F-72-6C-64-21";
             string bson = BytesToHex(ms.ToArray());
 
             Assert.AreEqual(expected, bson);
@@ -559,42 +559,40 @@ namespace Newtonsoft.Json.Cbor.Tests
         [Test]
         public void WriteDateTimes()
         {
-            throw new NotImplementedException();
-            //MemoryStream ms = new MemoryStream();
-            //CborDataWriter writer = new CborDataWriter(ms);
-            //writer.DateTimeKindHandling = DateTimeKind.Unspecified;
+            MemoryStream ms = new MemoryStream();
+            CborDataWriter writer = new CborDataWriter(ms);
+            writer.DateTimeKindHandling = DateTimeKind.Unspecified;
 
-            //writer.WriteStartArray();
-            //writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc));
-            //writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Local));
-            //writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Unspecified));
-            //writer.WriteEndArray();
+            writer.WriteStartArray();
+            writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc));
+            writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Local));
+            writer.WriteValue(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Unspecified));
+            writer.WriteEndArray();
 
-            //ms.Seek(0, SeekOrigin.Begin);
+            ms.Seek(0, SeekOrigin.Begin);
 
-            //CborDataReader reader = new CborDataReader(ms);
-            //reader.ReadRootValueAsArray = true;
-            //reader.DateTimeKindHandling = DateTimeKind.Utc;
+            CborDataReader reader = new CborDataReader(ms);
+            reader.DateTimeKindHandling = DateTimeKind.Utc;
 
-            //Assert.IsTrue(reader.Read());
-            //Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
+            Assert.IsTrue(reader.Read());
+            Assert.AreEqual(JsonToken.StartArray, reader.TokenType);
 
-            //Assert.IsTrue(reader.Read());
-            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            Assert.IsTrue(reader.Read());
+            Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            //Assert.IsTrue(reader.Read());
-            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            Assert.IsTrue(reader.Read());
+            Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            //Assert.IsTrue(reader.Read());
-            //Assert.AreEqual(JsonToken.Date, reader.TokenType);
-            //Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
+            Assert.IsTrue(reader.Read());
+            Assert.AreEqual(JsonToken.Date, reader.TokenType);
+            Assert.AreEqual(new DateTime(2000, 10, 12, 20, 55, 0, DateTimeKind.Utc), reader.Value);
 
-            //Assert.IsTrue(reader.Read());
-            //Assert.AreEqual(JsonToken.EndArray, reader.TokenType);
+            Assert.IsTrue(reader.Read());
+            Assert.AreEqual(JsonToken.EndArray, reader.TokenType);
 
-            //Assert.IsFalse(reader.Read());
+            Assert.IsFalse(reader.Read());
         }
 
         [Test]
@@ -610,7 +608,7 @@ namespace Newtonsoft.Json.Cbor.Tests
             writer.WriteValue(new DateTime(2000, 1, 1, 1, 1, 1, DateTimeKind.Unspecified));
             writer.WriteEndArray();
 
-            Assert.AreEqual("10-00-00-00-09-30-00-C8-88-07-6B-DC-00-00-00-00", (BitConverter.ToString(ms.ToArray())));
+            Assert.AreEqual("81-C0-74-32-30-30-30-2D-30-31-2D-30-31-20-30-31-3A-30-31-3A-30-31-5A", (BitConverter.ToString(ms.ToArray())));
         }
 
         public class RegexTestClass

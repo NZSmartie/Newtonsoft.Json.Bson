@@ -379,24 +379,24 @@ namespace Newtonsoft.Json.Cbor
         public override void WriteValue(DateTimeOffset value)
         {
             base.WriteValue(value);
-            switch (DateTimeKindHandling)
-            {
-                case DateTimeKind.Local:
-                    WriteDateTime(value.LocalDateTime);
-                    break;
-                case DateTimeKind.Utc:
-                    WriteDateTime(value.UtcDateTime);
-                    break;
-                case DateTimeKind.Unspecified:
-                    WriteDateTime(value.DateTime);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(DateTimeKindHandling));
-            }
+            WriteDateTime(value.DateTime);
         }
 
         private void WriteDateTime(DateTime dateTime)
         {
+            switch (DateTimeKindHandling)
+            {
+                case DateTimeKind.Local:
+                    dateTime = dateTime.ToLocalTime();
+                    break;
+                case DateTimeKind.Utc:
+                    dateTime = dateTime.ToUniversalTime();
+                    break;
+                case DateTimeKind.Unspecified:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(DateTimeKindHandling));
+            }
             switch (DateTimeEncoding)
             {
                 case DateTimeEncoding.String:
@@ -475,11 +475,9 @@ namespace Newtonsoft.Json.Cbor
 #endregion
 
         
-        public void WriteTag(int tag)
+        public void WriteTag(ulong tag)
         {
-            if (tag < 0)
-                throw ExceptionUtils.CreateJsonWriterException(this, "Can not write a negative tag value", null);
-            EnqueueValue(CborMajorType.Tagged, (ulong)tag, false);
+            EnqueueValue(CborMajorType.Tagged, tag, false);
         }
 
         private void EnqueueValue(long value)

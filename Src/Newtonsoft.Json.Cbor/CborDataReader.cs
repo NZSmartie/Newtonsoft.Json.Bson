@@ -54,6 +54,8 @@ namespace Newtonsoft.Json.Cbor
             }
         }
 
+        public ulong? Tag { get; protected set; }
+
         /// <summary>
         /// Gets or sets a value indicating whether binary data reading should be compatible with incorrect Json.NET 3.5 written binary.
         /// </summary>
@@ -236,12 +238,15 @@ namespace Newtonsoft.Json.Cbor
 
                 if (majorType == CborMajorType.Tagged)
                 {
-                    // Todo: Support Optional Tags
-                    var tag = ReadUInt64(simpleType); 
+                    Tag = ReadUInt64(simpleType);
 
                     initialByte = ReadInitialByte();
                     majorType = initialByte.Item1;
                     simpleType = initialByte.Item2;
+                }
+                else
+                {
+                    Tag = null;
                 }
 
                 switch (majorType)
@@ -320,13 +325,13 @@ namespace Newtonsoft.Json.Cbor
                                     PopContext();
                                     return true;
                                 }
-                                else if (_currentContext.MajorType == CborMajorType.Map)
+                                if (_currentContext.MajorType == CborMajorType.Map)
                                 {
                                     SetToken(JsonToken.EndObject);
                                     PopContext();
                                     return true;
                                 }
-                                else if (_currentContext.MajorType == CborMajorType.ByteString || _currentContext.MajorType == CborMajorType.TextString)
+                                if (_currentContext.MajorType == CborMajorType.ByteString || _currentContext.MajorType == CborMajorType.TextString)
                                 {
                                     PopContext();
                                 }
@@ -343,7 +348,10 @@ namespace Newtonsoft.Json.Cbor
                     case CborMajorType.ByteString:
                         if (simpleType != CborSimpleType.Break)
                         {
-                            SetToken(JsonToken.Bytes, _reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType))));
+                            if(_currentContext?.MajorType == CborMajorType.ByteString || !Tag.HasValue)
+                                SetToken(JsonToken.Bytes, _reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType))));
+                            else
+                                DecodeBytes(Tag.Value, _reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType))));
                             return true;
                         }
 
@@ -357,7 +365,10 @@ namespace Newtonsoft.Json.Cbor
                     case CborMajorType.TextString:
                         if (simpleType != CborSimpleType.Break)
                         {
-                            SetToken(JsonToken.String, Encoding.UTF8.GetString(_reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType)))));
+                            if(_currentContext?.MajorType == CborMajorType.TextString || !Tag.HasValue)
+                                SetToken(JsonToken.String, Encoding.UTF8.GetString(_reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType)))));
+                            else
+                                DecodeString(Tag.Value, Encoding.UTF8.GetString(_reader.ReadBytes(Convert.ToInt32(ReadUInt32(simpleType)))));
                             return true;
                         }
 
@@ -430,6 +441,34 @@ namespace Newtonsoft.Json.Cbor
         {
             var b = _reader.ReadByte();
             return Tuple.Create((CborMajorType)(b & 0xE0), (CborSimpleType)(b & 0x1F));
+        }
+
+        private void DecodeString(ulong tag, string value)
+        {
+            switch (tag)
+            {
+                case 0: // DateTime String
+                    SetToken(JsonToken.Date, DateTime.ParseExact(value, "u", CultureInfo.InvariantCulture));
+                    return;
+                default:
+                    SetToken(JsonToken.String, value);
+                    return;
+            }
+            
+        }
+
+        private void DecodeBytes(ulong tag, byte[] value)
+        {
+            switch (tag)
+            {
+                case 37: // UUID binary format
+                    SetToken(JsonToken.Bytes, new Guid(value));
+                    return;
+                default:
+                    SetToken(JsonToken.Bytes, value);
+                    return;
+            }
+
         }
 
         private byte[] ReadBytes(int count)

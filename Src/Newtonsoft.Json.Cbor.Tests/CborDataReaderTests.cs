@@ -188,7 +188,7 @@ namespace Newtonsoft.Json.Cbor.Tests
         [Test]
         public void ReadGuid_Bytes()
         {
-            byte[] data = HexToBytes("81-50-D7-EE-21-D8-5C-4B-C9-43-8A-C2-69-28-E5-79-B7-05");
+            byte[] data = HexToBytes("81-D8-25-50-D7-EE-21-D8-5C-4B-C9-43-8A-C2-69-28-E5-79-B7-05");
 
             MemoryStream ms = new MemoryStream(data);
             CborDataReader reader = new CborDataReader(ms);
